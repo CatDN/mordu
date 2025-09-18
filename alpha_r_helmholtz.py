@@ -33,7 +33,7 @@ class AlphaRHelmholtz():
             
             Delta_alpha_r = z[0]*z[1] * F * alpha_r_ij
         else:
-            Delta_alpha_r = 0
+            Delta_alpha_r = z[0]*z[1] * F
 
         # alpha_r should be a function of only delta and tau and z1 and z2
         alpha_r  = sum([z[i]*alpha_r_list[i] for i in range(len(z))]) + Delta_alpha_r   

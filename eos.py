@@ -17,6 +17,8 @@ class EOS:
 
         self.name = name
 
+        self.pressure_equation = sp.lambdify((rho, P, T, z1, z2), P- self.pressure)
+
     @property
     def pressure(self):
         pressure_expression = rho*self.fluid.R*T*(1+ rho*sp.diff(self.alpha_r.alpha_r, rho))

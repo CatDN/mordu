@@ -88,6 +88,7 @@ class EOSMixture():
             alpha_r + sp.diff(alpha_r, z1) - z2*sp.diff(alpha_r, z2)  - z1*sp.diff(alpha_r, z1) - sp.log(Z) + Z -1,
             alpha_r + sp.diff(alpha_r, z2) - z1*sp.diff(alpha_r, z1)  - z2*sp.diff(alpha_r, z2) - sp.log(Z) + Z -1
         ]
+        
 
         phi_i = [sp.exp(ln_phi_i[i]) for i in range(len(ln_phi_i))]
 
