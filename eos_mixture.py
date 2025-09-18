@@ -2,10 +2,7 @@
 #05/03/2025
 
 #class for mixture EOS
-import sympy as sp
 from symbols import *
-
-
 
 class EOSMixture():
 
@@ -30,10 +27,15 @@ class EOSMixture():
 
 
 
-        #residual temperature and density parameters, harcoded for now
-        beta_T_12 = 1/0.98824 # because [0301] take ammonia to be the first component while I use hydrogen
+        # #residual temperature and density parameters, harcoded for now
+        # beta_T_12 = 1/0.98824 # because [0301] take ammonia to be the first component while I use hydrogen
+        # gamma_T_12 = 1.1266
+        # beta_V_12 = 1/1.0103 # because [0301] take ammonia to be the first component while I use hydrogen
+        # gamma_V_12 = 0.7298
+
+        beta_T_12 = 0.98824 
         gamma_T_12 = 1.1266
-        beta_V_12 = 1/1.0103 # because [0301] take ammonia to be the first component while I use hydrogen
+        beta_V_12 = 1.0103 
         gamma_V_12 = 0.7298
 
         # beta_T_12 = 1 
@@ -56,7 +58,7 @@ class EOSMixture():
         # optional name of EOS
         self.name = name
         
-        # pressure equation
+        # pressure equation, included as attribute because it is frequently necessary
         self.pressure_equation = sp.lambdify((rho, P, T, z1, z2), P- self.pressure)
 
     
@@ -64,9 +66,6 @@ class EOSMixture():
     #pressure
     @property
     def pressure(self):
-        # alphar_delta_tau = self.alpha_r.alpha_r.subs([(rho, delta*self.rho_r),(T, self.T_r/tau)])
-        # pressure = rho*R*T*(1+delta*sp.diff(alphar_delta_tau, delta)).subs([(delta, rho/self.rho_r), (tau, self.T_r/T)])
-
         pressure = rho*R*T*(1 + rho*sp.diff(self.alpha_r.alpha_r, rho))
         
         return pressure
@@ -74,9 +73,6 @@ class EOSMixture():
     #compressibility factor
     @property
     def compressibility(self):
-        # alphar_delta_tau = self.alpha_r.alpha_r.subs([(rho, delta*self.rho_r),(T, self.T_r/tau)])
-        # compressibility = (1+delta*sp.diff(alphar_delta_tau, delta)).subs([(delta, rho/self.rho_r), (tau, self.T_r/T)])
-
         compressibility = 1 + rho*sp.diff(self.alpha_r.alpha_r, rho)
         
         return compressibility
@@ -84,7 +80,7 @@ class EOSMixture():
     # fugacity coefficients
     @property
     def fugacity_coefficients(self):
-        alpha_r = self.alpha_r.alpha_r#.subs([(rho, delta*self.rho_r),(T, self.T_r/tau)])
+        alpha_r = self.alpha_r.alpha_r
         Z = self.compressibility
 
 
@@ -92,8 +88,6 @@ class EOSMixture():
             alpha_r + sp.diff(alpha_r, z1) - z2*sp.diff(alpha_r, z2)  - z1*sp.diff(alpha_r, z1) - sp.log(Z) + Z -1,
             alpha_r + sp.diff(alpha_r, z2) - z1*sp.diff(alpha_r, z1)  - z2*sp.diff(alpha_r, z2) - sp.log(Z) + Z -1
         ]
-
-        # ln_phi_i = [ln_phi_i[i].subs([(delta, rho/self.rho_r), (tau, self.T_r/T)]) for i in range(len(ln_phi_i))]
 
         phi_i = [sp.exp(ln_phi_i[i]) for i in range(len(ln_phi_i))]
 

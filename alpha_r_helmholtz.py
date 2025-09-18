@@ -5,7 +5,7 @@ from symbols import *
 class AlphaRHelmholtz():
     
     def __init__(self, alpha_r_expr: sp.core.add.Add ):
-        self.expression = alpha_r_expr  #needed to form the mixture EOS
+        self.expression = alpha_r_expr  
         
         self.alpha_r = alpha_r_expr
         
@@ -35,11 +35,7 @@ class AlphaRHelmholtz():
         else:
             Delta_alpha_r = 0
 
-        #sub rho and T in the pure fluid alpha_r to delta and tau of the mixture along with the reduced variables rho_r and T_r
-        # alpha_r_list = [alpha_r_list[i].alpha_r_expr.subs([(rho, delta*rho_r), (T, T_r/tau)]) for i in range(len(alpha_r_list))]
-        # alpha_r_list = [alpha_r_list[i].alpha_r for i in range(len(alpha_r_list))]
-
-        #alpha_r as a function of delta and tau
-        alpha_r  = sum([z[i]*alpha_r_list[i] for i in range(len(z))]) + Delta_alpha_r   # alpha_r should be a function of only delta and tau
+        # alpha_r should be a function of only delta and tau and z1 and z2
+        alpha_r  = sum([z[i]*alpha_r_list[i] for i in range(len(z))]) + Delta_alpha_r   
 
         return cls(alpha_r)
