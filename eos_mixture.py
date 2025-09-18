@@ -6,7 +6,7 @@ from symbols import *
 
 class EOSMixture():
 
-    def __init__(self, name, mixture, alpha_r_class, EOS_1, EOS_2, **kwargs):
+    def __init__(self, name, mixture, alpha_r_class, EOS_1, EOS_2, beta_T:list = None, gamma_T:list = None, beta_V: list = None, gamma_V: list = None , **kwargs):
         """
         **kwargs:
             mixture_rule
@@ -19,35 +19,29 @@ class EOSMixture():
         self.EOS_1 = EOS_1
         self.EOS_2 = EOS_2
 
+        # for making the calculation of other properties easier
+        fluids = [self.mixture.fluid_1, self.mixture.fluid_2]
+        z = [self.mixture.z1, self.mixture.z2]
+
         # calculate alpha0
         self.alpha_0 = self.mixture.z1*(self.EOS_1.alpha_0.alpha_0 + sp.log(self.mixture.z1)) + self.mixture.z2*(self.EOS_2.alpha_0.alpha_0 + sp.log(self.mixture.z2))
 
         # calculate alpha_r
         self.alpha_r = alpha_r_class.for_mixture(self.mixture, [self.EOS_1.alpha_r, self.EOS_2.alpha_r], **kwargs)
 
+        # generalised binary coefficients according to [0315] page 69 on pdf
+        if beta_T == None or gamma_T == None or beta_V == None or gamma_V == None:
+            gamma_V = [[4*(1/fluids[i].rho_c + 1/fluids[j].rho_c) / (1/fluids[i].rho_c**(1/3) + 1/fluids[j].rho_c**(1/3))**3 for i in [0,1]] for j in [0,1]]
+            gamma_T = [[0.5 * (fluids[i].T_c + fluids[j].T_c) / (fluids[i].T_c*fluids[j].T_c)**0.5 for i in [0,1]] for j in [0,1]]
+            beta_T = [[1, 1],[1, 1]]
+            beta_V = [[1, 1],[1, 1]]
+            
 
-
-        # #residual temperature and density parameters, harcoded for now
-        # beta_T_12 = 1/0.98824 # because [0301] take ammonia to be the first component while I use hydrogen
-        # gamma_T_12 = 1.1266
-        # beta_V_12 = 1/1.0103 # because [0301] take ammonia to be the first component while I use hydrogen
-        # gamma_V_12 = 0.7298
-
-        beta_T_12 = 0.98824 
-        gamma_T_12 = 1.1266
-        beta_V_12 = 1.0103 
-        gamma_V_12 = 0.7298
-
-        # beta_T_12 = 1 
-        # gamma_T_12 = 0.5 * (self.mixture.fluid_1.T_c + self.mixture.fluid_2.T_c)/(self.mixture.fluid_1.T_c * self.mixture.fluid_2.T_c)**0.5
-        # beta_V_12 = 1 
-        # gamma_V_12 = 4 * (1/self.mixture.fluid_1.rho_c + 1/self.mixture.fluid_2.rho_c) * (1/self.mixture.fluid_1.rho_c**(1/3) + 1/self.mixture.fluid_2.rho_c**(1/3))**(-3)
-        
         # residual density
-        self.rho_r = 1/(self.mixture.z1**2/self.mixture.fluid_1.rho_c + self.mixture.z2**2/self.mixture.fluid_2.rho_c + 2*self.mixture.z1*self.mixture.z2*beta_V_12*gamma_V_12*(self.mixture.z1+self.mixture.z2)/(beta_V_12**2*self.mixture.z1+self.mixture.z2)*1/8*(1/self.mixture.fluid_1.rho_c**(1/3) + 1/self.mixture.fluid_2.rho_c**(1/3))**3)
+        self.rho_r = 1/sum([sum([z[i]*z[j]*beta_V[i][j]*gamma_V[i][j] * (z[i] + z[j])/ (beta_V[i][j]**2 * z[i] + z[j]) * 1/8 * (1/fluids[i].rho_c**(1/3) + 1/fluids[j].rho_c**(1/3))**3 for i in [0,1]]) for j in [0,1]])
 
         # residual temperature
-        self.T_r = 1*self.mixture.z1**2*self.mixture.fluid_1.T_c + self.mixture.z2**2*self.mixture.fluid_2.T_c + 2*self.mixture.z1*self.mixture.z2*beta_T_12*gamma_T_12*(self.mixture.z1+self.mixture.z2)/(beta_T_12**2*self.mixture.z1+self.mixture.z2)*(self.mixture.fluid_1.T_c*self.mixture.fluid_2.T_c)**0.5
+        self.T_r = sum([sum([z[i]*z[j]*beta_T[i][j]*gamma_T[i][j] * (z[i] + z[j])/ (beta_T[i][j]**2 * z[i] + z[j]) * (fluids[i].T_c * fluids[j].T_c)**0.5 for i in [0,1]]) for j in [0,1]])
 
         #ensure alpha_r is in terms of T and rho and not tau and delta
         self.alpha_r.alpha_r = self.alpha_r.alpha_r.subs([(delta, rho/rho_r), (tau, T_r/T), (rho_r, self.rho_r), (T_r, self.T_r)])

@@ -263,19 +263,19 @@ def VLE_P_dew(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e-3,
             x = x / sum(x)
             #calculate new liquid density
             density_liq = calc_density_liq(method, EOS, pressure, temperature, *x,  **kwargs)
-            print("densities = ", density_vap, density_liq)
+            # print("densities = ", density_vap, density_liq)
 
             #calculate new liquid fugacity
             phi_liq = [phi_1(density_liq, temperature, *x), phi_2(density_liq, temperature, *x)]
-            print("fugacities = ", phi_vap, phi_liq)
+            # print("fugacities = ", phi_vap, phi_liq)
 
             #recalculate K
             K = [phi_liq[i] / phi_vap[i] for i in range(2)]
             # print("loop_summation_change namespace:", phi_vap)
             #recalculate x from y and K
             x = [y[i] / K[i] for i in range(2)]   
-            print("x = ", x)
-            print("sum of x = ", sum(x))
+            # print("x = ", x)
+            # print("sum of x = ", sum(x))
 
         return x_t, x, density_vap, density_liq
 
@@ -311,7 +311,7 @@ def VLE_P_dew(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e-3,
             # else, if less than 1, then increase pressure (too little liquid)
             elif sum(x) < 1:
                 pressure = pressure + pressure*pressure_factor * min((1, abs(sum(x) - 1)))
-            print("pressure = ", pressure)
+            # print("pressure = ", pressure)
 
             # normalise x
             x = x/sum(x)
@@ -320,12 +320,12 @@ def VLE_P_dew(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e-3,
             # calculate densities
             density_vap = calc_density_vap(method, EOS, pressure, temperature, *y, **kwargs)
             density_liq = calc_density_liq(method, EOS, pressure, temperature, *x, **kwargs)
-            print("densities = ", density_vap, density_liq)
+            # print("densities = ", density_vap, density_liq)
 
             # calculate fugacity coefficients
             phi_vap = [phi_1(density_vap, temperature, *y), phi_2(density_vap, temperature, *y)]
             phi_liq = [phi_1(density_liq, temperature, *x), phi_2(density_liq, temperature, *x)]
-            print("fugacities = ", phi_vap, phi_liq)
+            # print("fugacities = ", phi_vap, phi_liq)
 
             # calculate K from fugacity
             K = [phi_liq[i] / phi_vap[i] for i in range(2)]
@@ -333,7 +333,7 @@ def VLE_P_dew(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e-3,
 
             # recalculate x from y and K
             x = [y[i] / K[i] for i in range(2)]
-            print("x = ", x)
+            # print("x = ", x)
             # print("loop_mole_fraction_1 namespace:", phi_vap)
 
             x_t, x, density_vap, density_liq = loop_summation_change(x_t, x, pressure, phi_vap, density_vap, density_liq, **kwargs)
@@ -388,25 +388,25 @@ def VLE_P_dew(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e-3,
         # normalise x
         # x = x/sum(x)
 
-        print("x on main loop before fugacity = ", x)
+        # print("x on main loop before fugacity = ", x)
 
         #calculate densities
         density_vap = calc_density_vap(method, EOS, pressure, temperature, *y, **kwargs)
         density_liq = calc_density_liq(method, EOS, pressure, temperature, *x, **kwargs)
-        print("densities on main loop = ", density_vap, density_liq)
+        # print("densities on main loop = ", density_vap, density_liq)
 
         #calculate gugacity coefficients
         phi_vap = [phi_1(density_vap, temperature, *y), phi_2(density_vap, temperature, *y)]
         phi_liq = [phi_1(density_liq, temperature, *x), phi_2(density_liq, temperature, *x)]
-        print("fugacities on main loop = ", phi_vap, phi_liq)
+        # print("fugacities on main loop = ", phi_vap, phi_liq)
 
         #calculate K from fugacity
         K = [phi_liq[i]/phi_vap[i] for i in range(2)]
-        print("K on main loop= ", K)
+        # print("K on main loop= ", K)
 
         #recalculate x from y and K
         x = [y[i]/K[i] for i in range(2)]
-        print("x on main loop = ",x)
+        # print("x on main loop = ",x)
 
         # ====================================== LOOPS
         # print("main namespace 1:", density_liq, density_vap)
@@ -436,16 +436,16 @@ def VLE_P_dew(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e-3,
             K2_guess = y[1]/x[1]
 
         # # pressure_guess dependent on composition step
-        # if len(pressures)<2:
-        #     y = [y[0]+step, y[1]-step]
-        #     pressure_guess = pressure
-        # else:
-        #     pressure_guess = pressure + (pressures[-2]- pressures[-1])/(compositions[-2] - compositions[-1])*step
-        #     y = [y[0]+step, y[1]-step]
+        if len(pressures)<2:
+            y = [y[0]+step, y[1]-step]
+            pressure_guess = pressure
+        else:
+            pressure_guess = pressure + (pressures[-2]- pressures[-1])/(compositions[-2] - compositions[-1])*step
+            y = [y[0]+step, y[1]-step]
 
         # disable if needed
-        y = [y[0]+step, y[1]-step]
-        pressure_guess = pressure
+        # y = [y[0]+step, y[1]-step]
+        # pressure_guess = pressure
 
     return compositions, pressures
 

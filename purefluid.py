@@ -70,8 +70,8 @@ N2 = PureFluid(
         formula = "N2",
         M = 28.0134e-3,                   # [kg/mol], source = https://webbook.nist.gov/cgi/cbook.cgi?ID=C7727379&Mask=4
         P_c = 33.978e5,                   # [Pa], source = [0532] page 65
-        T_c = 126.19,                     # [K], source = [0532] page 65
-        rho_c=  11.177*1e3,               # [mol/m3], source = [0532] page 65
+        T_c = 126.192,                    # [K], source = [0451] page 44
+        rho_c=  11.1839*1e3,              # [mol/m3], source = [0451] page 44
         P_t =  0.012563e6,                # [Pa], source = [0532] page 62
         T_t = 63.15,                      # [K], source = [0532] page 62
         rho_t = 31.046e3,                 # [mol/m3], source = [0532] page 62
@@ -106,10 +106,10 @@ NH3 = PureFluid(
 CH4 = PureFluid(
         name = "methane",
         formula = "CH4",
-        M = 16.0428e-3,                 # [kg/mol], source = [0543]
+        M = 16.04246e-3,                # [kg/mol], source = [0451]
         P_c = 4.5922e6,                 # [Pa], source = [0543]
         T_c = 190.564,                  # [K], source = [0543]
-        rho_c =  162.66/16.0428e-3,     # [mol/m3], source = [0543]
+        rho_c = 10.139342719e3,         # [mol/m3], source = [0451]
         P_t = 0.011696e6,               # [Pa], source = [0543]
         T_t = 90.6941,                  # [K], source = [0543]
         rho_t = None,                   # [mol/m3], source = None

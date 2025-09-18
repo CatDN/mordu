@@ -23,19 +23,19 @@ class AlphaRHelmholtz():
         fluids = [mix.fluid_1, mix.fluid_2]
 
         # for each pure fluid alpha_r substitute rho and T for delta and tau with the critical values of each respective fluid
-        alpha_r_list = [alpha_r_list[i].alpha_r.subs([(rho, delta*fluids[i].rho_c), (T, fluids[i].T_c/tau)]) for i in range(len(fluids))]
+        alpha_rs = [alpha_r_list[i].alpha_r.subs([(rho, delta*fluids[i].rho_c), (T, fluids[i].T_c/tau)]) for i in range(len(fluids))]
 
         # now each alpha_r is a function of delta and tau instead of rho and T
 
         if F != 0:
             alpha_r_ij = sum([n_ij[k]*delta**d_ij[k]*tau**t_ij[k] for k in range(1,2+1)]) + \
-                            sum([n_ij[k]*delta**d_ij[k]*tau**t_ij[k]*sp.exp(-eta_ij[k]*(delta-epsilon_ij[k])**2-beta_ij[k]*(tau-gamma_ij[k])**2) for k in range(3, 4+1)])
+                            sum([n_ij[k]*delta**d_ij[k]*tau**t_ij[k]*sp.exp(- eta_ij[k] * (delta-epsilon_ij[k])**2 - beta_ij[k] * (tau - gamma_ij[k])**2) for k in range(3, 4+1)])
             
             Delta_alpha_r = z[0]*z[1] * F * alpha_r_ij
         else:
-            Delta_alpha_r = z[0]*z[1] * F
+            Delta_alpha_r = 0
 
         # alpha_r should be a function of only delta and tau and z1 and z2
-        alpha_r  = sum([z[i]*alpha_r_list[i] for i in range(len(z))]) + Delta_alpha_r   
+        alpha_r  = sum([z[i]*alpha_rs[i] for i in range(len(z))]) + Delta_alpha_r   
 
         return cls(alpha_r)
