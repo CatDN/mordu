@@ -18,7 +18,7 @@ class AlphaRHelmholtz():
 
     # for a binary mixture
     @classmethod
-    def for_mixture(cls, mix, alpha_r_list: list, F:float =0, n_ij=[], t_ij=[], d_ij=[], eta_ij=[], beta_ij=[], gamma_ij=[], epsilon_ij=[], **kwargs):
+    def for_mixture(cls, mix, alpha_r_list: list, F:float =0, n_ij=[], t_ij=[], d_ij=[], eta_ij=[], beta_ij=[], gamma_ij=[], epsilon_ij=[], k_pol=0, k_exp=0, k_gbs=0, **kwargs):
         z = [mix.z1, mix.z2]
         fluids = [mix.fluid_1, mix.fluid_2]
 
@@ -28,8 +28,10 @@ class AlphaRHelmholtz():
         # now each alpha_r is a function of delta and tau instead of rho and T
 
         if F != 0:
-            alpha_r_ij = sum([n_ij[k]*delta**d_ij[k]*tau**t_ij[k] for k in range(1,2+1)]) + \
-                            sum([n_ij[k]*delta**d_ij[k]*tau**t_ij[k]*sp.exp(- eta_ij[k] * (delta-epsilon_ij[k])**2 - beta_ij[k] * (tau - gamma_ij[k])**2) for k in range(3, 4+1)])
+            # general formula from [0451]
+            alpha_r_ij = sum([n_ij[k]*delta**d_ij[k]*tau**t_ij[k] for k in range(0,k_pol)]) + \
+                            sum([n_ij[k]*delta**d_ij[k]*tau**t_ij[k] * sp.exp(-eta_ij[k] * (delta - epsilon_ij[k])**2 - beta_ij[k] * (delta - gamma_ij[k]) ) for k in range(k_pol, k_pol+k_exp)]) + \
+                                sum([n_ij[k]*delta**d_ij[k]*tau**t_ij[k] * sp.exp(- eta_ij[k] * (delta - epsilon_ij[k])**2 - beta_ij[k] * (tau - gamma_ij[k])**2) for k in range(k_exp, k_exp+k_gbs)])           
             
             Delta_alpha_r = z[0]*z[1] * F * alpha_r_ij
         else:
