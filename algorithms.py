@@ -106,7 +106,7 @@ def Wilson_P_solve(temperature, fluid_1, fluid_2, wilson_pressure=1e5,**kwargs):
 
     print("Solving Wilson approximation ...")
 
-    K1_guess, K2_guess, pressure_guess = 1, 1, 1e5
+    K1_guess, K2_guess, pressure_guess = 1, 1, 5e5
 
     while pressure_guess<1e8:
         try:
@@ -386,7 +386,7 @@ def VLE_P_dew(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e-3,
         # print("x_t = ", x_t)
 
         # normalise x
-        # x = x/sum(x)
+        x = x/sum(x)
 
         # print("x on main loop before fugacity = ", x)
 
