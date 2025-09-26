@@ -435,7 +435,7 @@ def VLE_P_dew(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e-3,
         else:
             K2_guess = y[1]/x[1]
 
-        # # pressure_guess dependent on composition step
+        # pressure_guess dependent on composition step
         if len(pressures)<2:
             y = [y[0]+step, y[1]-step]
             pressure_guess = pressure
@@ -443,7 +443,7 @@ def VLE_P_dew(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e-3,
             pressure_guess = pressure + (pressures[-2]- pressures[-1])/(compositions[-2] - compositions[-1])*step
             y = [y[0]+step, y[1]-step]
 
-        # disable if needed
+        # # enable if needed, but it does slow down the algorithm
         # y = [y[0]+step, y[1]-step]
         # pressure_guess = pressure
 

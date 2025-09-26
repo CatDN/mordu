@@ -25,4 +25,4 @@ The package will allow the user to define their own fluids and equations of stat
 
 Further functionality includes vapour liquid equilibria algorithms and P-x diagram creation.
 
-(The symbol is a bear because I like bears).
+(The symbol is a bear because I like bears, his name is EOS).
