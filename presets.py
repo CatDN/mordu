@@ -52,26 +52,29 @@ def alpha_r_0300():
     out ->  alpha_r expression 
     """
 
-    #non-ideal gas part
-    n = [0, 0.006132232, 1.7395866, -2.2261792, -0.30127553, 0.08967023, -0.076387037, -0.84063963, -0.27026327, 6.212578, -5.7844357, 2.4817542, -2.3739168, 0.01493697, -3.7749264, 0.0006254348, -0.000017359, -0.13462033, 0.07749072839, -1.6909858, 0.93739074]
-    t = [0, 1, 0.382, 1, 1, 0.677, 2.915, 3.51, 1.063, 0.655, 1.3, 3.1, 1.4395, 1.623, 0.643, 1.13, 4.5, 1, 4, 4.3315, 4.015]
-    d = [0, 4, 1, 1, 2, 3, 3, 2, 3, 1, 1, 1, 2, 2, 1, 3, 3, 1, 1, 1, 1]    
-    l = [0, 0, 0, 0, 0, 0, 2, 2, 1]
-    eta = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.42776, 0.6424, 0.8175, 0.7995, 0.91, 0.3574, 1.21, 4.14, 22.56, 22.68, 2.8452, 2.8342]
-    beta = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1.708, 1.4865, 2.0915, 2.43, 0.488, 1.1, 0.85, 1.14, 945.64, 993.85, 0.3696, 0.2962]
-    gamma = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1.036, 1.2777, 1.083, 1.2906, 0.928, 0.934, 0.919, 1.852, 1.05897, 1.05277, 1.108, 1.313]
-    epsilon = [0, 0, 0, 0, 0, 0, 0, 0, 0, -0.0726, -0.1274, 0.7527, 0.57, 2.2, -0.243, 2.96, 3.02, 0.9574, 0.9576, 0.4478, 0.44689]
-    b = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.244, 0.6826]
+    
+    n = [0.006132232, 1.7395866, -2.2261792, -0.30127553, 0.08967023, -0.076387037, -0.84063963, -0.27026327, 6.212578, -5.7844357, 2.4817542, -2.3739168, 0.01493697, -3.7749264, 0.0006254348, -0.000017359, -0.13462033, 0.07749072839, -1.6909858, 0.93739074]
+    t = [1, 0.382, 1, 1, 0.677, 2.915, 3.51, 1.063, 0.655, 1.3, 3.1, 1.4395, 1.623, 0.643, 1.13, 4.5, 1, 4, 4.3315, 4.015]
+    d = [4, 1, 1, 2, 3, 3, 2, 3, 1, 1, 1, 2, 2, 1, 3, 3, 1, 1, 1, 1]    
 
-    alpha_r = sum([n[i]*delta**d[i]*tau**t[i] for i in range(1, 5+1)]) + \
-                sum([n[i]*delta**d[i]*tau**t[i]*sp.exp(-delta**l[i]) for i in range(6, 8+1)]) + \
-                    sum([n[i]*delta**d[i]*tau**t[i]*sp.exp( -eta[i]*(delta-epsilon[i])**2 - beta[i]*(tau-gamma[i])**2) for i in range(9,18+1)]) + \
-                        sum([n[i]*delta**d[i]*tau**t[i]*sp.exp( -eta[i]*(delta-epsilon[i])**2 + 1/(beta[i]*(tau-gamma[i])**2+b[i]))for i in range(19, 20+1)])
+    l = [2, 2, 1]
+    eta = [0.42776, 0.6424, 0.8175, 0.7995, 0.91, 0.3574, 1.21, 4.14, 22.56, 22.68, 2.8452, 2.8342]
+    beta = [1.708, 1.4865, 2.0915, 2.43, 0.488, 1.1, 0.85, 1.14, 945.64, 993.85, 0.3696, 0.2962]
+    gamma = [1.036, 1.2777, 1.083, 1.2906, 0.928, 0.934, 0.919, 1.852, 1.05897, 1.05277, 1.108, 1.313]
+    epsilon = [-0.0726, -0.1274, 0.7527, 0.57, 2.2, -0.243, 2.96, 3.02, 0.9574, 0.9576, 0.4478, 0.44689]
+    b = [1.244, 0.6826]
 
 
-    alpha_r = alpha_r.subs([(delta, rho/NH3.rho_c), (tau, NH3.T_c/T)])
+    alpha_r_0300 =  sum([n[i] * delta ** d[i] * tau ** t[i] for i in range(0, 5)]) + \
+                    sum([n[i] * delta ** d[i] * tau ** t[i] * sp.exp(-delta ** l[i-5]) for i in range(5, 8)]) + \
+                    sum([n[i] * delta ** d[i] * tau ** t[i] * sp.exp(-eta[i-8] * (delta - epsilon[i-8]) ** 2 - beta[i-8] * (tau - gamma[i-8])**2) for i in range(8, 18)]) + \
+                    sum([n[i] * delta ** d[i] * tau ** t[i] * sp.exp(-eta[i-8] * (delta - epsilon[i-8]) ** 2 + 1/(beta[i-8] * (tau - gamma[i-8])**2 + b[i-18])) for i in range(18, 20)])
 
-    return alpha_r
+
+    alpha_r_0300 = alpha_r_0300.subs([(delta, rho/NH3.rho_c), (tau, NH3.T_c/T)])
+
+
+    return alpha_r_0300
 
 # =============== Hydrogen
 #from [0313], made specifically for HYDROGEN
@@ -103,9 +106,9 @@ def alpha_r_0313():
     n = 14
 
     #calculate alpha_r
-    alpha_r = sum([N[i]*delta**d[i]*tau**t[i] for i in range(1, l+1)]) + \
+    alpha_r =   sum([N[i]*delta**d[i]*tau**t[i] for i in range(1, l+1)]) + \
                 sum([N[i]*delta**d[i]*tau**t[i]*sp.exp(-delta**p[i]) for i in range(l+1, m+1)]) + \
-                    sum([N[i]*delta**d[i]*tau**t[i]*sp.exp(phi[i]*(delta-D[i])**2 + beta[i]*(tau-gamma[i])**2) for i in range(m+1, n+1)])
+                sum([N[i]*delta**d[i]*tau**t[i]*sp.exp(phi[i]*(delta-D[i])**2 + beta[i]*(tau-gamma[i])**2) for i in range(m+1, n+1)])
 
     #substitue delta for rho/rho_c and tau for T_c/T
     alpha_r = alpha_r.subs([(delta, rho/H2.rho_c), (tau, H2.T_c/T)])    #since rho_c is in [mol/m3] the equations should now have the approppriate units (dimensionless but rho units must match)

@@ -38,7 +38,7 @@ class EOSMixture():
             
 
         # residual density
-        self.rho_r = 1/sum([sum([z[i]*z[j]*beta_V[i][j]*gamma_V[i][j] * (z[i] + z[j])/ (beta_V[i][j]**2 * z[i] + z[j]) * 1/8 * (1/fluids[i].rho_c**(1/3) + 1/fluids[j].rho_c**(1/3))**3 for i in [0,1]]) for j in [0,1]])
+        self.rho_r = 1/sum([sum([z[i]*z[j]*beta_V[i][j]*gamma_V[i][j] * (z[i] + z[j])/ (beta_V[i][j]**2 * z[i] + z[j]) * 1/8 * (fluids[i].rho_c**(-1/3) + fluids[j].rho_c**(-1/3))**3 for i in [0,1]]) for j in [0,1]])
 
         # residual temperature
         self.T_r = sum([sum([z[i]*z[j]*beta_T[i][j]*gamma_T[i][j] * (z[i] + z[j])/ (beta_T[i][j]**2 * z[i] + z[j]) * (fluids[i].T_c * fluids[j].T_c)**0.5 for i in [0,1]]) for j in [0,1]])

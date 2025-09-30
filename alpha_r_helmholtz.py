@@ -29,9 +29,9 @@ class AlphaRHelmholtz():
 
         if F != 0:
             # general formula from [0451]
-            alpha_r_ij = sum([n_ij[k] * delta**d_ij[k] * tau**t_ij[k] for k in range(0,k_pol)]) + \
-                            sum([n_ij[k] * delta**d_ij[k] * tau**t_ij[k] * sp.exp(-eta_ij[k] * (delta - epsilon_ij[k])**2 - beta_ij[k] * (delta - gamma_ij[k]) ) for k in range(k_pol, k_pol+k_exp)]) + \
-                                sum([n_ij[k] * delta**d_ij[k] * tau**t_ij[k] * sp.exp(- eta_ij[k] * (delta - epsilon_ij[k])**2 - beta_ij[k] * (tau - gamma_ij[k])**2) for k in range(k_exp, k_exp+k_gbs)])           
+            alpha_r_ij =    sum([n_ij[k] * delta**d_ij[k] * tau**t_ij[k] for k in range(0,k_pol)]) + \
+                            sum([n_ij[k] * delta**d_ij[k] * tau**t_ij[k] * sp.exp(- eta_ij[k] * (delta - epsilon_ij[k])**2 - beta_ij[k] * (delta - gamma_ij[k]) ) for k in range(k_pol, k_pol+k_exp)]) + \
+                            sum([n_ij[k] * delta**d_ij[k] * tau**t_ij[k] * sp.exp(- eta_ij[k] * (delta - epsilon_ij[k])**2 - beta_ij[k] * (tau - gamma_ij[k])**2) for k in range(k_pol+k_exp, k_exp+k_gbs)])           
             
             Delta_alpha_r = z[0]*z[1] * F * alpha_r_ij
         else:
