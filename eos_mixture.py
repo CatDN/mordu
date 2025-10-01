@@ -19,10 +19,6 @@ class EOSMixture():
         self.EOS_1 = EOS_1
         self.EOS_2 = EOS_2
 
-        # for making the calculation of other properties easier
-        fluids = [self.mixture.fluid_1, self.mixture.fluid_2]
-        z = [self.mixture.z1, self.mixture.z2]
-
         # calculate alpha0
         self.alpha_0 = self.mixture.z1*(self.EOS_1.alpha_0.alpha_0 + sp.log(self.mixture.z1)) + self.mixture.z2*(self.EOS_2.alpha_0.alpha_0 + sp.log(self.mixture.z2))
 
