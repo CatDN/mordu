@@ -40,7 +40,7 @@ class AlphaRSAFT():
     
 
 
-
+    ################################################# Static methods
     # hard sphere
     @staticmethod
     def alpha_hs(sigma, epsilon, m):
@@ -90,17 +90,35 @@ class AlphaRSAFT():
     @staticmethod
     def alpha_assoc(association_scheme:str ="", epsilon:float = 0, sigma:float = 0, m:float = 0, epsilon_AB:float = 0, k_AB:float = 0, M:int = 0):
         ########################################### define association scheme methods
-        def assoc_2B():
-            return
+        def assoc_2B(Delta):
+            # source = [0328]
+            X_A = (-1 + (1+4*rho*Delta)**0.5)/(4*rho*Delta)
+            X_B = X_A
+            return [X_A, X_B]
 
-        def assoc_4B():
-            return
+        def assoc_4B(Delta):
+            # source = [0328]
+            X_A = (-(1 - 2 * rho * Delta) + ((1 + 2 * rho * Delta)**2 + 4 * rho *Delta)**0.5)/(6 * rho * Delta)
+            X_B = X_A
+            X_C = X_A
+            X_D = 3*X_A -2
+            return [X_A, X_B, X_C, X_D]            
 
-        def assoc_3B():
-            return
+        def assoc_3B(Delta):
+            # source = [0328]
+            X_A = (-(1 - rho * Delta) + ((1 + rho * Delta)**2 + 4 * rho *Delta)**0.5)/(4 * rho * Delta)
+            X_B = X_A
+            X_C = 2 * X_A -1
+            return [X_A, X_B, X_C]            
 
-        def assoc_4C():
-            return
+        def assoc_4C(Delta):
+            # source = [0328]
+            X_A = (-1 + (1 + 8 * rho * Delta)**0.5)/(4 * rho * Delta)
+            X_B = X_A
+            X_C = X_A
+            X_D = X_A
+            return [X_A, X_B, X_C, X_D]            
+
 
         ########################################## select association scheme
         if association_scheme=="2B":
@@ -119,6 +137,7 @@ class AlphaRSAFT():
             raise(ValueError("Please select a valid association scheme..."))
 
         ########################################## calculate the association alpha
+
         g_hs = 1/(1-zeta_n[3])
 
         Delta = g_hs*(sp.exp(epsilon_AB/T)-1) * (sigma**3 * k_AB)
@@ -127,7 +146,7 @@ class AlphaRSAFT():
         
         alpha_assoc = sum([sp.log(X_A) - X_A/2 for X_A in X]) + 0.5*M
 
-        return
+        return alpha_assoc
     
     # multipolar
     def alpha_multipolar():
