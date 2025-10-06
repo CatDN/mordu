@@ -23,10 +23,13 @@ class AlphaRSAFT():
         alpha_chain = cls.alpha_chain(sigma, epsilon, m)
 
         # hard chain
-        alpha_hc = m*alpha_hs + alpha_chain
+        # alpha_hc = m*alpha_hs + alpha_chain
 
         # dispersion
         alpha_disp = cls.alpha_disp(sigma, epsilon, m, a, b)
+
+        # association
+        alpha_assoc = cls.alpha_assoc(association_scheme, epsilon, sigma, m, epsilon_AB, k_AB, M)
 
 
         return 
@@ -48,7 +51,7 @@ class AlphaRSAFT():
 
         zeta_n = [sp.pi/6*rho*m*d**n for n in range(0, 4)]
 
-        alpha_hs = m * 1/zeta_n[0] * ( 3*zeta_n[1]*zeta_n[2]/(1-zeta_n[3]) + zeta_n[2]**3/(zeta_n[3]*(1-zeta_n[3])**2) + (zeta_n[2]**3/zeta_n[3]**2 -zeta_n[0])*sp.log(1-zeta_n[3]))
+        alpha_hs = 1/zeta_n[0] * ( 3*zeta_n[1]*zeta_n[2]/(1-zeta_n[3]) + zeta_n[2]**3/(zeta_n[3]*(1-zeta_n[3])**2) + (zeta_n[2]**3/zeta_n[3]**2 -zeta_n[0])*sp.log(1-zeta_n[3]))
         
         return alpha_hs
     
@@ -137,6 +140,7 @@ class AlphaRSAFT():
             raise(ValueError("Please select a valid association scheme..."))
 
         ########################################## calculate the association alpha
+
 
         g_hs = 1/(1-zeta_n[3])
 
