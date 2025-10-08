@@ -4,9 +4,30 @@ from symbols import *
 
 class AlphaRSAFT():
     
-    def __init__(self):
+    def __init__(self,epsilon:float, sigma:float, m:float, epsilon_AB:float, k_AB:float, M:int, x_p:float, 
+                 alpha_hs, alpha_chain, alpha_disp, alpha_assoc):
 
-        pass
+        self.epsilon = epsilon
+
+        self.sigma = sigma
+        
+        self.m = m
+
+        self.epsilon_AB = epsilon_AB
+
+        self.k_AB = k_AB
+
+        self.M = M
+
+        self.x_p = x_p
+
+        self.alpha_hs = alpha_hs
+        self.alpha_chain = alpha_chain
+        self.alpha_disp = alpha_disp
+        self.alpha_assoc = alpha_assoc
+
+        self.alpha_r = alpha_hs + alpha_chain + alpha_disp + alpha_assoc
+
         
 
     # for a pure fluid (fluid is just a placeholder argument)
@@ -22,9 +43,6 @@ class AlphaRSAFT():
         # chain
         alpha_chain = cls.alpha_chain(sigma, epsilon, m)
 
-        # hard chain
-        # alpha_hc = m*alpha_hs + alpha_chain
-
         # dispersion
         alpha_disp = cls.alpha_disp(sigma, epsilon, m, a, b)
 
@@ -32,7 +50,7 @@ class AlphaRSAFT():
         alpha_assoc = cls.alpha_assoc(association_scheme, epsilon, sigma, m, epsilon_AB, k_AB, M)
 
 
-        return 
+        return cls(epsilon, sigma, m, epsilon_AB, k_AB, M, x_p, alpha_hs, alpha_chain, alpha_disp, alpha_assoc)
 
     # for a binary mixture
     @classmethod
@@ -51,7 +69,8 @@ class AlphaRSAFT():
 
         zeta_n = [sp.pi/6*rho*m*d**n for n in range(0, 4)]
 
-        alpha_hs = 1/zeta_n[0] * ( 3*zeta_n[1]*zeta_n[2]/(1-zeta_n[3]) + zeta_n[2]**3/(zeta_n[3]*(1-zeta_n[3])**2) + (zeta_n[2]**3/zeta_n[3]**2 -zeta_n[0])*sp.log(1-zeta_n[3]))
+        # from [0329]
+        alpha_hs = m / zeta_n[0] * ( 3*zeta_n[1]*zeta_n[2]/(1-zeta_n[3]) + zeta_n[2]**3/(zeta_n[3]*(1-zeta_n[3])**2) + (zeta_n[2]**3/zeta_n[3]**2 -zeta_n[0])*sp.log(1-zeta_n[3]))
         
         return alpha_hs
     
@@ -120,9 +139,9 @@ class AlphaRSAFT():
             X_B = X_A
             X_C = X_A
             X_D = X_A
-            return [X_A, X_B, X_C, X_D]            
-
-
+            return [X_A, X_B, X_C, X_D]
+        
+            
         ########################################## select association scheme
         if association_scheme=="2B":
             scheme = assoc_2B
@@ -136,11 +155,18 @@ class AlphaRSAFT():
         elif association_scheme=="4C":
             scheme = assoc_4C
 
+        elif association_scheme=="0":   # for if the molecule does not associate, like hydrogen
+            return 0
+
         else:
             raise(ValueError("Please select a valid association scheme..."))
 
         ########################################## calculate the association alpha
+    
+        d = sigma*(1-0.12*sp.exp(-3*epsilon/T))
 
+
+        zeta_n = [sp.pi/6*rho*m*d**n for n in range(0,4)]
 
         g_hs = 1/(1-zeta_n[3])
 
@@ -153,7 +179,24 @@ class AlphaRSAFT():
         return alpha_assoc
     
     # multipolar
-    def alpha_multipolar():
-        return
+    @staticmethod
+    def alpha_multipolar(fluid, sigma, x_p):
+        mu = fluid.dipole   # in Debyes
+
+        # non dimensional variables
+        rho_star = rho*sigma**3                                         # non dimensional number density
+
+        mu_star = mu*1e-18/(k_b_Gaussian*T*(sigma*1e-8)**3)**0.5
+        T_star = 1/mu_star**2
+
+        #I2 and I3 expressions which simplify the calculation of the multipolar term, these are different from the dispersion ones
+        I2 = (1 - 0.3618*rho_star - 0.3205*rho_star**2 + 0.1078*rho_star**3)/(1-0.5236*rho_star)**2
+
+        I3 = (1 + 0.62378*rho_star - 0.11658*rho_star**2)/(1-0.59056*rho_star + 0.20059*rho_star**2)
+
+        #now calculate the multipolar term
+        alpha_multipolar = (-2*sp.pi/9 * (1/T_star)**2 * rho_star * x_p**2 * I2) / (1 + 5*sp.pi/36 * 1/T_star * rho_star * x_p *I3/I2)
+
+        return alpha_multipolar
     
     
