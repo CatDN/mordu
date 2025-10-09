@@ -5,10 +5,16 @@ import sympy as sp
 R = 8.31446261815324
 
 # boltzmann constant in si
-k_b = 1.380649e-23          # [J/K] -> [m2 kg/(s2 K)]
+k_b = 1.380649e-23              # [J/K] -> [m2 kg/(s2 K)]
 
 # boltzmann constant in Gaussian units
 k_b_Gaussian = 1.380649e-16     # [erg/K]
+
+# Avogadros number
+N_av = 6.022140857*1e23         # Avogadro's number
+
+# pi, in float
+pi = float(sp.pi)
 
 # symbols:
 # sympy symbols used throuout all files
