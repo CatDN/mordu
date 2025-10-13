@@ -41,18 +41,29 @@ class AlphaRSAFT():
                       association_scheme:str = "", 
                       alpha_hs = None, alpha_chain=None, alpha_disp = None, alpha_assoc=None, alpha_multipolar=None,
                       **kwargs):
+        
+        # values used in most terms
+        d = sigma * (1 - 0.12 * sp.exp(-3*epsilon/T))
+
+        zeta_n = [pi/6*rho*m*d**n for n in range(0, 4)]
+
+        eta = zeta_n[3]
+
         # print(epsilon, sigma, m, epsilon_AB, k_AB, M, a, b)
         # hard sphere
         if alpha_hs == None:
-            alpha_hs = cls.alpha_hs(sigma, epsilon, m).subs([(rho, rho*N_av*1e-30)])
+            alpha_hs = cls.alpha_hs(m, zeta_n).subs([(rho, rho*N_av*1e-30)])
 
         # chain
         if alpha_chain ==None:
-            alpha_chain = cls.alpha_chain(sigma, epsilon, m).subs([(rho, rho*N_av*1e-30)])
+            alpha_chain = cls.alpha_chain(m, d, zeta_n).subs([(rho, rho*N_av*1e-30)])
 
         # dispersion
         if alpha_disp == None:
-            alpha_disp = cls.alpha_disp(sigma, epsilon, m, a, b).subs([(rho, rho*N_av*1e-30)])
+            m2e1sigma3 = m**2*epsilon/T*sigma**3
+            m2e2sigma3 = m**2*(epsilon/T)**2*sigma**3
+
+            alpha_disp = cls.alpha_disp(m, eta, a, b, m2e1sigma3, m2e2sigma3).subs([(rho, rho*N_av*1e-30)])
 
         # association
         if alpha_assoc == None:
@@ -66,9 +77,34 @@ class AlphaRSAFT():
 
     # for a binary mixture
     @classmethod
-    def for_mixture(cls):
+    def for_mixture(cls, mix, saft_alpha_r_list: list, mixture_rule, **kwargs):
+        z = [mix.z1, mix.z2]
 
+        m = sum(z[i]*saft_alpha_r_list[i].m for i in range(len(z)) )   # segment length of mixture
 
+        d_i = [saft_alpha_r_list[i].sigma*(1-0.12*sp.exp(-3*saft_alpha_r_list[i].epsilon/T)) for i in range(len(z))]    #pure fluid d
+
+        zeta_n = [pi/6 * rho * sum(z[i]*saft_alpha_r_list[i].m * d_i[i]**n for i in range(len(z))) for n in range(0,4)]
+
+        eta = zeta_n[3]
+
+        # hard sphere
+        if alpha_hs == None:
+            alpha_hs = cls.alpha_hs(m, zeta_n).subs([(rho, rho*N_av*1e-30)])
+
+        # chain
+        if alpha_chain ==None:
+            alpha_chain = sum(z[i]*saft_alpha_r_list[i].alpha_chain for i in range(len(z)))
+
+        # dispersion
+        if alpha_disp == None:
+            # mixture sigma and epsilon from mixture rules
+
+            
+            m2e1sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * epsilon[i][j]/T * sigma[i][j]**3 for i in range(len(z))) for j in range(len(z)))
+            m2e2sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * (epsilon[i][j]/T)**2 * sigma[i][j]**3 for i in range(len(z))) for j in range(len(z)))
+
+            alpha_disp = cls.alpha_disp(m, eta, a, b, m2e1sigma3, m2e2sigma3).subs([(rho, rho*N_av*1e-30)])
         return
     
 
@@ -76,11 +112,7 @@ class AlphaRSAFT():
     ################################################# Static methods
     # hard sphere
     @staticmethod
-    def alpha_hs(sigma, epsilon, m):
-        d = sigma * (1 - 0.12 * sp.exp(-3*epsilon/T))
-
-        zeta_n = [pi/6*rho*m*d**n for n in range(0, 4)]
-
+    def alpha_hs(m, zeta_n):
         # from [0329]
         alpha_hs = m / zeta_n[0] * ( 3*zeta_n[1]*zeta_n[2]/(1-zeta_n[3]) + zeta_n[2]**3/(zeta_n[3]*(1-zeta_n[3])**2) + (zeta_n[2]**3/zeta_n[3]**2 -zeta_n[0])*sp.log(1-zeta_n[3]))
         # print(f"alpha_hs = {alpha_hs}")
@@ -88,11 +120,7 @@ class AlphaRSAFT():
     
     # chain
     @staticmethod
-    def alpha_chain(sigma, epsilon, m):
-        d = sigma * (1 - 0.12 * sp.exp(-3*epsilon/T))
-
-        zeta_n = [pi/6*rho*m*d**n for n in range(0, 4)]
-
+    def alpha_chain(m, d, zeta_n):
         g_hs = 1/(1-zeta_n[3]) + d/2* 3*zeta_n[2]/(1-zeta_n[3])**2 + d**2/4 * 2*zeta_n[2]**2/(1-zeta_n[3])**3
 
         alpha_chain = -(m-1)*sp.log(g_hs)
@@ -101,11 +129,7 @@ class AlphaRSAFT():
     
     # dispersion
     @staticmethod
-    def alpha_disp(sigma, epsilon, m, a:list, b:list):
-        d = sigma * (1 - 0.12 * sp.exp(-3*epsilon/T))
-
-        eta = pi/6*rho*m*d**3
-        # print(f"eta = {eta}")
+    def alpha_disp(m, eta, a:list, b:list, m2e1sigma3, m2e2sigma3):
 
         C1 = (1 + m*(8*eta - 2*eta**2)/(1-eta)**4 + (1-m)* (20*eta-27*eta**2 + 12*eta**3 -2*eta**4)/((1-eta)*(2-eta))**2)**(-1)
         # print(f"C1 = {C1}")
@@ -120,7 +144,7 @@ class AlphaRSAFT():
         I2 = sum([b_i[i] *eta**i for i in range (0, 7)])
         # print(f"I2 = {I2}")
 
-        alpha_disp = -2*pi*rho*I1* m**2*epsilon/T*sigma**3 - pi*rho*m*C1*I2* m**2*(epsilon/T)**2*sigma**3
+        alpha_disp = -2*pi*rho*I1* m2e1sigma3 - pi*rho*m*C1*I2* m2e2sigma3
         # print(f"alpha_disp = {alpha_disp}")
         return alpha_disp
     
