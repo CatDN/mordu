@@ -67,7 +67,11 @@ class AlphaRSAFT():
 
         # association
         if alpha_assoc == None:
-            alpha_assoc = cls.alpha_assoc(association_scheme, epsilon, sigma, m, epsilon_AB, k_AB, M).subs([(rho, rho*N_av*1e-30)])
+            g_hs = 1/(1-zeta_n[3]) + d/2* 3*zeta_n[2]/(1-zeta_n[3])**2 + d**2/4 * 2*zeta_n[2]**2/(1-zeta_n[3])**3
+
+            Delta = g_hs*(sp.exp(epsilon_AB/T)-1) * (sigma**3 * k_AB)
+            
+            alpha_assoc = cls.alpha_assoc(association_scheme, Delta).subs([(rho, rho*N_av*1e-30)])
 
         # multipolar
         if alpha_multipolar ==None:
@@ -82,7 +86,7 @@ class AlphaRSAFT():
 
         m = sum(z[i]*saft_alpha_r_list[i].m for i in range(len(z)) )   # segment length of mixture
 
-        d_i = [saft_alpha_r_list[i].sigma*(1-0.12*sp.exp(-3*saft_alpha_r_list[i].epsilon/T)) for i in range(len(z))]    #pure fluid d
+        d_i = [alpha_r.sigma*(1-0.12*sp.exp(-3*alpha_r.epsilon/T)) for alpha_r in saft_alpha_r_list]    #pure fluid d
 
         zeta_n = [pi/6 * rho * sum(z[i]*saft_alpha_r_list[i].m * d_i[i]**n for i in range(len(z))) for n in range(0,4)]
 
@@ -99,12 +103,32 @@ class AlphaRSAFT():
         # dispersion
         if alpha_disp == None:
             # mixture sigma and epsilon from mixture rules
+            epsilon_list = [alpha_r.epsilon for alpha_r in saft_alpha_r_list]
+            sigma_list = [alpha_r.sigma for alpha_r in saft_alpha_r_list]
 
-            
-            m2e1sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * epsilon[i][j]/T * sigma[i][j]**3 for i in range(len(z))) for j in range(len(z)))
-            m2e2sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * (epsilon[i][j]/T)**2 * sigma[i][j]**3 for i in range(len(z))) for j in range(len(z)))
+            epsilon_ij, sigma_ij = mixture_rule(epsilon_list, sigma_list, **kwargs)
+
+            m2e1sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * epsilon_ij[i][j]/T * sigma_ij[i][j]**3 for i in range(len(z))) for j in range(len(z)))
+            m2e2sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * (epsilon_ij[i][j]/T)**2 * sigma_ij[i][j]**3 for i in range(len(z))) for j in range(len(z)))
 
             alpha_disp = cls.alpha_disp(m, eta, a, b, m2e1sigma3, m2e2sigma3).subs([(rho, rho*N_av*1e-30)])
+
+        # association, assumes fluid 1 is non-associating and fluid 2 is associating
+        if alpha_assoc == None:
+            # calculate mixture epsilon_AB_ij and k_AB_ij through mixture rules
+            k_AB_list = [alpha_r.k_AB for alpha_r in saft_alpha_r_list]
+            epsilon_AB_list = [alpha_r.epsilon_AB for alpha_r in saft_alpha_r_list]
+
+            k_AB_ij, epsilon_AB_ij = mixture_rule(k_AB_list, epsilon_AB_list)
+
+            g_hs_ij = [[1/(1-zeta_n[3]) + (d_i[i]*d_i[j])*3*zeta_n[2]/(1-zeta_n[3])**2 + ((d_i[i]*d_i[j])/(d_i[i]+d_i[j]))**2 * 2*zeta_n[2]**2/(1-zeta_n[3])**3 for i in range(len(d_i))] for j in range(len(d_i))]
+
+
+
+            Delta_ij = g_hs*(sp.exp(epsilon_AB/T)-1) * (sigma**3 * k_AB)
+            
+            alpha_assoc = cls.alpha_assoc(association_scheme, Delta).subs([(rho, rho*N_av*1e-30)])
+
         return
     
 
@@ -150,7 +174,7 @@ class AlphaRSAFT():
     
     # association
     @staticmethod
-    def alpha_assoc(association_scheme:str ="", epsilon:float = 0, sigma:float = 0, m:float = 0, epsilon_AB:float = 0, k_AB:float = 0, M:int = 0):
+    def alpha_assoc(association_scheme: str ="", Delta: sp.core.add.Add = 0):
         ########################################### define association scheme methods
         def assoc_2B(Delta):
             # source = [0328]
@@ -208,19 +232,10 @@ class AlphaRSAFT():
             raise(ValueError("Please select a valid association scheme..."))
 
         ########################################## calculate the association alpha
-    
-        d = sigma*(1-0.12*sp.exp(-3*epsilon/T))
-
-
-        zeta_n = [pi/6*rho*m*d**n for n in range(0,4)]
-
-        g_hs = 1/(1-zeta_n[3]) + d/2* 3*zeta_n[2]/(1-zeta_n[3])**2 + d**2/4 * 2*zeta_n[2]**2/(1-zeta_n[3])**3
-
-        Delta = g_hs*(sp.exp(epsilon_AB/T)-1) * (sigma**3 * k_AB)
-        
+           
         X = scheme(Delta)
         
-        alpha_assoc = sum([sp.log(X_A) - X_A/2 for X_A in X]) + 0.5*M
+        alpha_assoc = sum([sp.log(X_A) - X_A/2 + 0.5 for X_A in X])
         # print(f"alpha_assoc = {alpha_assoc}")
         return alpha_assoc
     
