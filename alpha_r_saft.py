@@ -4,7 +4,7 @@ from symbols import *
 
 class AlphaRSAFT():
     
-    def __init__(self, epsilon:float, sigma:float, m:float, epsilon_AB:float, k_AB:float, M:int, x_p:float, 
+    def __init__(self, epsilon:float, sigma:float, m:float, epsilon_AB:float, k_AB:float, M:int, x_p:float, assocation_scheme:str,
                  alpha_hs, alpha_chain, alpha_disp, alpha_assoc, alpha_multipolar):
 
         self.epsilon = epsilon
@@ -20,6 +20,8 @@ class AlphaRSAFT():
         self.M = M
 
         self.x_p = x_p
+
+        self.assocation_scheme = assocation_scheme
 
         self.alpha_hs = alpha_hs
         self.alpha_chain = alpha_chain
@@ -77,11 +79,13 @@ class AlphaRSAFT():
         if alpha_multipolar ==None:
             alpha_multipolar = cls.alpha_multipolar(fluid, sigma, x_p).subs([(rho, rho*N_av*1e-30)])
 
-        return cls(epsilon, sigma, m, epsilon_AB, k_AB, M, x_p, alpha_hs, alpha_chain, alpha_disp, alpha_assoc, alpha_multipolar)
+        return cls(epsilon, sigma, m, epsilon_AB, k_AB, M, x_p, association_scheme, alpha_hs, alpha_chain, alpha_disp, alpha_assoc, alpha_multipolar)
 
     # for a binary mixture
     @classmethod
-    def for_mixture(cls, mix, saft_alpha_r_list: list, mixture_rule, **kwargs):
+    def for_mixture(cls, mix, saft_alpha_r_list: list, mixture_rule, 
+                    a:list, b:list,
+                    **kwargs):
         z = [mix.z1, mix.z2]
 
         m = sum(z[i]*saft_alpha_r_list[i].m for i in range(len(z)) )   # segment length of mixture
@@ -92,44 +96,55 @@ class AlphaRSAFT():
 
         eta = zeta_n[3]
 
+        # mixture sigma and epsilon from mixture rules
+        epsilon_list = [alpha_r.epsilon for alpha_r in saft_alpha_r_list]
+        sigma_list = [alpha_r.sigma for alpha_r in saft_alpha_r_list]
+
+        epsilon_ij, sigma_ij = mixture_rule(epsilon_list, sigma_list, **kwargs)
+
+        # calculate mixture epsilon_AB_ij and k_AB_ij through mixture rules
+        k_AB_list = [alpha_r.k_AB for alpha_r in saft_alpha_r_list]
+        epsilon_AB_list = [alpha_r.epsilon_AB for alpha_r in saft_alpha_r_list]
+
+        k_AB_ij, epsilon_AB_ij = mixture_rule(k_AB_list, epsilon_AB_list)
+        
+
+
         # hard sphere
-        if alpha_hs == None:
-            alpha_hs = cls.alpha_hs(m, zeta_n).subs([(rho, rho*N_av*1e-30)])
+        alpha_hs = cls.alpha_hs(m, zeta_n).subs([(rho, rho*N_av*1e-30)])
+
 
         # chain
-        if alpha_chain ==None:
-            alpha_chain = sum(z[i]*saft_alpha_r_list[i].alpha_chain for i in range(len(z)))
+        #weighted average of component alpha_chain values
+        alpha_chain = sum(z[i]*saft_alpha_r_list[i].alpha_chain for i in range(len(z)))
+
 
         # dispersion
-        if alpha_disp == None:
-            # mixture sigma and epsilon from mixture rules
-            epsilon_list = [alpha_r.epsilon for alpha_r in saft_alpha_r_list]
-            sigma_list = [alpha_r.sigma for alpha_r in saft_alpha_r_list]
+        m2e1sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * epsilon_ij[i][j]/T * sigma_ij[i][j]**3 for i in range(len(z))) for j in range(len(z)))
+        m2e2sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * (epsilon_ij[i][j]/T)**2 * sigma_ij[i][j]**3 for i in range(len(z))) for j in range(len(z)))
 
-            epsilon_ij, sigma_ij = mixture_rule(epsilon_list, sigma_list, **kwargs)
+        alpha_disp = cls.alpha_disp(m, eta, a, b, m2e1sigma3, m2e2sigma3).subs([(rho, rho*N_av*1e-30)])
 
-            m2e1sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * epsilon_ij[i][j]/T * sigma_ij[i][j]**3 for i in range(len(z))) for j in range(len(z)))
-            m2e2sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * (epsilon_ij[i][j]/T)**2 * sigma_ij[i][j]**3 for i in range(len(z))) for j in range(len(z)))
-
-            alpha_disp = cls.alpha_disp(m, eta, a, b, m2e1sigma3, m2e2sigma3).subs([(rho, rho*N_av*1e-30)])
 
         # association, assumes fluid 1 is non-associating and fluid 2 is associating
-        if alpha_assoc == None:
-            # calculate mixture epsilon_AB_ij and k_AB_ij through mixture rules
-            k_AB_list = [alpha_r.k_AB for alpha_r in saft_alpha_r_list]
-            epsilon_AB_list = [alpha_r.epsilon_AB for alpha_r in saft_alpha_r_list]
+        g_hs_ij = [[1/(1-zeta_n[3]) + (d_i[i]*d_i[j])*3*zeta_n[2]/(1-zeta_n[3])**2 + ((d_i[i]*d_i[j])/(d_i[i]+d_i[j]))**2 * 2*zeta_n[2]**2/(1-zeta_n[3])**3 for i in range(len(d_i))] for j in range(len(d_i))]
 
-            k_AB_ij, epsilon_AB_ij = mixture_rule(k_AB_list, epsilon_AB_list)
+        Delta_ij = [[g_hs_ij[i][j]*(sp.exp(epsilon_AB_ij[i][j]/T)-1) * (sigma_ij[i][j]**3 * k_AB_ij[i][j]) for i in range(len(d_i))] for j in range(len(d_i))]
 
-            g_hs_ij = [[1/(1-zeta_n[3]) + (d_i[i]*d_i[j])*3*zeta_n[2]/(1-zeta_n[3])**2 + ((d_i[i]*d_i[j])/(d_i[i]+d_i[j]))**2 * 2*zeta_n[2]**2/(1-zeta_n[3])**3 for i in range(len(d_i))] for j in range(len(d_i))]
+        x_Delta_ij = [[z[j]*Delta_ij[i][j] for i in range(len(d_i))] for j in range(len(d_i))]
 
+        Delta = x_Delta_ij[1][1]
 
+        association_scheme = saft_alpha_r_list[1].assocation_scheme
+        
+        alpha_assoc = cls.alpha_assoc(association_scheme, Delta).subs([(rho, rho*N_av*1e-30)])
 
-            Delta_ij = g_hs*(sp.exp(epsilon_AB/T)-1) * (sigma**3 * k_AB)
-            
-            alpha_assoc = cls.alpha_assoc(association_scheme, Delta).subs([(rho, rho*N_av*1e-30)])
+        # multipolar
+        # weighted average of component multipolar term values
+        x_p_i = [alpha_r.x_p for alpha_r in saft_alpha_r_list]
+        alpha_multipolar = sum(z[i]*saft_alpha_r_list[i].alpha_multipolar for i in range(len(z)))
 
-        return
+        return cls(epsilon_ij, sigma_ij, m, epsilon_AB_ij, k_AB_ij, M, x_p_i, association_scheme, alpha_hs, alpha_chain, alpha_disp, alpha_assoc, alpha_multipolar)
     
 
 
@@ -226,7 +241,7 @@ class AlphaRSAFT():
 
         elif association_scheme=="":   # for if the molecule does not associate, like hydrogen
             print("no association scheme was selected")
-            return 0
+            return sp.simplify(0)
 
         else:
             raise(ValueError("Please select a valid association scheme..."))

@@ -629,6 +629,9 @@ def VLE_P_bubble(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e
         y_t = sum(y)
         # print("y_t = ", y_t)
 
+        #normalise y
+        y = y / sum(y)
+
         #calculate densities
         density_vap = calc_density_vap(method, EOS, pressure, temperature, *y, **kwargs)
         density_liq = calc_density_liq(method, EOS, pressure, temperature, *x, **kwargs)
@@ -676,17 +679,17 @@ def VLE_P_bubble(EOS, temperature, method= "multi-root", tolerance=1e-6, step=1e
         # print(f"x = {x}, and y = {y}")
 
 
-        # # pressure_guess dependent on composition step
-        # if len(pressures)<2:
-        #     y = [x[0]+step, x[1]-step]
-        #     pressure_guess = pressure
-        # else:
-        #     pressure_guess = pressure + (pressures[-2]- pressures[-1])/(compositions[-2] - compositions[-1])*step
-        #     x = [x[0]+step, x[1]-step]
+        # pressure_guess dependent on composition step
+        if len(pressures)<2:
+            x = [x[0]+step, x[1]-step]
+            pressure_guess = pressure
+        else:
+            pressure_guess = pressure + (pressures[-2]- pressures[-1])/(compositions[-2] - compositions[-1])*step
+            x = [x[0]+step, x[1]-step]
 
         # disable if needed
-        x = [x[0]+step, x[1]-step]
-        pressure_guess = pressure
+        # x = [x[0]+step, x[1]-step]
+        # pressure_guess = pressure
 
         # print("guess = ", K1_guess, K2_guess, pressure_guess)
 

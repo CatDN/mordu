@@ -19,7 +19,7 @@ import sympy as sp
 
 #     return a_mix, b_mix
 
-def one_fluid_theory(param_1_list: list, param_2_list: list, delta:float=0, k_ij: list =[[0,0],[0,0]]):
+def one_fluid_theory(param_1_list: list, param_2_list: list, delta:float=0, k_ij: list =[[0,0],[0,0]], **kwargs):
     # geometric average
     param_1_ij = [[(1-k_ij[i][j])*(param_1_list[i]*param_1_list[j])**0.5 for i in range(len(param_1_list))] for j in range(len(param_1_list))]
 
