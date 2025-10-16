@@ -116,7 +116,7 @@ class AlphaRSAFT():
 
         # chain
         #weighted average of component alpha_chain values
-        alpha_chain = sum(z[i]*saft_alpha_r_list[i].alpha_chain for i in range(len(z)))
+        alpha_chain = sum(z[i]*saft_alpha_r_list[i].alpha_chain for i in range(len(z))).subs([(rho, rho*N_av*1e-30)])
 
 
         # dispersion
@@ -142,7 +142,7 @@ class AlphaRSAFT():
         # multipolar
         # weighted average of component multipolar term values
         x_p_i = [alpha_r.x_p for alpha_r in saft_alpha_r_list]
-        alpha_multipolar = sum(z[i]*saft_alpha_r_list[i].alpha_multipolar for i in range(len(z)))
+        alpha_multipolar = sum(z[i]*saft_alpha_r_list[i].alpha_multipolar for i in range(len(z))).subs([(rho, rho*N_av*1e-30)])
 
         return cls(epsilon_ij, sigma_ij, m, epsilon_AB_ij, k_AB_ij, M, x_p_i, association_scheme, alpha_hs, alpha_chain, alpha_disp, alpha_assoc, alpha_multipolar)
     
