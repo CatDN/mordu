@@ -1,7 +1,3 @@
 __pycache__/
 dataframes/
-dataframes/ammonia_density.xlsx
-dataframes/experimental_data_density/0357.xlsx
-dataframes/experimental_data_density/0358.xlsx
-dataframes/experimental_data_density/0360.xlsx
-dataframes/experimental_data_density/0361.xlsx
+
