@@ -71,6 +71,9 @@ def multi_root(f: callable = None, bracket = None, args: tuple = (), n: int = 10
     roots_unique[abs(f(roots_unique, *args)) > 1e-3] = np.nan 
     roots_unique = roots_unique[~np.isnan(roots_unique)]
 
+    # sort the roots in ascending order
+    roots_unique = np.sort(roots_unique)
+
 
     return roots_unique   
 
