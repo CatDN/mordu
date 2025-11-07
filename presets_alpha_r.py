@@ -41,6 +41,44 @@ def alpha_r_0290():
     alpha_r = alpha_r.subs([(rho, rho*NH3.M)])
     return alpha_r
 
+#from [0298], made specifically for AMMONIA
+def alpha_r_0298():
+    """
+    Source: [0298]
+    Applicable fluids: Ammonia
+    EOS type: Helmholtz energy based
+    returns the residual reduced Helmholtz energy as a function of density and temperature
+    
+    ---
+    in -> object from fluid_store.py
+    out -> list containing alpha_r terms, which when summed equal to alpha_r expression 
+    """
+
+    #calculate Q
+    A_ij = [
+    [-6.4690439557, -13.295625875,-8.1211770915, -6.9690043553, -9.7365802349, 3.4816642617],
+    [8.8100445762, -5.0789548707, -68.261583422, -74.727156949, 49.751854179, -14.487156374],
+    [-10.467902857, 361.91907645, 1327.8270222, 1484.2843304, -82.229122939, 20.170856719],
+    [75.049574001, -2103.9451938, -7576.1007937, -8334.8746422, 43.998475959, -9.2773376718],
+    [-409.02964153, 6212.2822515, 22341.800329, 23618.791735, 0, 0],
+    [1072.479955, -10816.10642, -38259.344112, -38233.534003, 0, 0],
+    [-1471.4013145, 11195.138723, 38544.628190, 35887.294649, 0, 0],
+    [1046.2341301, -6365.7466698, -21314.815310, -18162.094974, 0, 0],
+    [-305.80081169, 1532.0616045, 5021.6962092, 3812.3691534, 0, 0] 
+    ]
+
+    tau_c = 1.2333498
+    Q =sum([sum([A_ij[i][j]*(rho)**(i)*(tau-tau_c)**(j) for j in range(0, 5+1)]) for i in range(0, 8+1)])
+
+    alpha_r = rho*Q
+
+    alpha_r = alpha_r.subs([(tau, 500/T), (rho, rho*1e-3)]) #sub in for tau and correct units of density from g/cm^3 to kg/m^3
+
+    #correct units again, and make density into molar density
+    alpha_r = alpha_r.subs([(rho, rho*NH3.M)])
+    return alpha_r
+
+
 def alpha_r_0300():
     """
     Source: [0300]

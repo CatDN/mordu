@@ -8,51 +8,6 @@ import warnings
 from scipy import optimize
 from symbols import *
 
-def surface_root(pressure_surface_equation, args, density_row, pressure_surface, composition_index, pressure_value):
-    pressure_row = pressure_surface[composition_index, :] - pressure_value
-
-    y = pressure_row
-    x = density_row
-    f = pressure_surface_equation
-
-    sign_changes = np.where(np.sign(y[:-1]) != np.sign(y[1:]))[0]
-
-    # Find roots around sign changes
-    root_finders = (
-        optimize.root_scalar(
-            method="bisect",
-            f=f,
-            args=args,
-            bracket=(x[s], x[s+1]),
-            xtol=1e-12, rtol=1e-12
-        )
-        for s in sign_changes
-    )
-
-
-    roots = np.array([
-        r.root if r.converged else np.nan
-        for r in root_finders
-    ])
-
-
-    if np.any(np.isnan(roots)):
-        warnings.warn("Not all root finders converged for estimated brackets! Maybe increase resolution `n`.")
-        roots = roots[~np.isnan(roots)]
-
-    roots_unique = np.unique(roots)
-    if len(roots_unique) != len(roots):
-        warnings.warn("One root was found multiple times. "
-                    "Try to increase or decrease resolution `n` to see if this warning disappears.")
-
-    #check if the roots correspond to actual roots or a discontinuity
-    #if inputting the root into the function results in a distance higher than 10 then assume its not a root and assign nan
-    roots_unique[abs(f(roots_unique, *args)) > 1] = np.nan 
-    roots_unique = roots_unique[~np.isnan(roots_unique)]
-
-
-    return roots_unique   
-
 #find multiple roots of a function between a specific bracket (univariate function only)
 def multi_root(f: callable = None, bracket = None, args: tuple = (), n: int = 1000) -> np.ndarray:
     """ Find all roots of f in `bracket`, given that resolution `n` covers the sign change.
