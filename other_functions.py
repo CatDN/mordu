@@ -67,8 +67,8 @@ def multi_root(f: callable = None, bracket = None, args: tuple = (), n: int = 10
                     "Try to increase or decrease resolution `n` to see if this warning disappears.")
 
     #check if the roots correspond to actual roots or a discontinuity
-    #if inputting the root into the function results in a distance higher than 1 then assume its not a root and assign nan
-    roots_unique[abs(f(roots_unique, *args)) > 1e-3] = np.nan 
+    #if inputting the root into the function results in a distance higher than 1 then assume its not a root and assign None
+    roots_unique[abs(f(roots_unique, *args)) > 1e0] = None
     roots_unique = roots_unique[~np.isnan(roots_unique)]
 
     # sort the roots in ascending order

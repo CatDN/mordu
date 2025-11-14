@@ -19,41 +19,89 @@ from presets_alpha_r import alpha_r_0290, alpha_r_0298, alpha_r_0300, alpha_r_03
 from symbols import *
 from other_functions import multi_root
 
-# =========================== Ammonia
-
 # ============================================================ cubic EOS presets
-
 # dictionaries for cubic EOS parameters for ammonia
 vdW = {
-    "alpha_r_expr":  sp.log(abs(1/rho/(1/rho-b)))-a/(R*T*1/rho),
+    "alpha_r_expr":  sp.log((1/rho/(1/rho-b)))-a/(R*T*1/rho),
     "a_c_expr": 27/64*R**2*T_c**2/P_c,
     "alpha_T_expr": sp.sympify(1),
     "b_expr": 1/8*R*T_c/P_c
 }
 
 PR = {
-    "alpha_r_expr": sp.log(abs(1/rho/(1/rho-b))) + 1/(R*T)*a/(4*b)*2**0.5*sp.log(abs((1/rho-b*(2**0.5-1))/(1/rho+b*(2**0.5+1)))),
+    "alpha_r_expr": sp.log((1/rho/(1/rho-b))) + 1/(R*T)*a/(4*b)*2**0.5*sp.log(((1/rho-b*(2**0.5-1))/(1/rho+b*(2**0.5+1)))),
     "a_c_expr": 0.4572*R**2*T_c**2/P_c,
     "alpha_T_expr": (1+(0.37464+1.54226*omega - 0.2699*omega**2)*(1-(T/T_c)**0.5))**2,
     "b_expr": 0.0778*R*T_c/P_c
 }
 
 RK = {
-    "alpha_r_expr": sp.log(abs(1/rho/(1/rho-b))) + 1/(R*T)*a/b*sp.log(abs(1/rho/(1/rho+b))),
+    "alpha_r_expr": sp.log((1/rho/(1/rho-b))) + 1/(R*T)*a/b*sp.log((1/rho/(1/rho+b))),
     "a_c_expr": 0.4275*R**2*T_c**2/P_c,
     "alpha_T_expr": 1/T**0.5,
     "b_expr":  0.0867*R*T_c/P_c
 }
 
 MSRK = {
-    "alpha_r_expr": sp.log(abs((1/rho/(1/rho-b)))) + 1/(R*T)*a/b*sp.log(abs(1/rho/(1/rho+b))),
+    "alpha_r_expr": sp.log(((1/rho/(1/rho-b)))) + 1/(R*T)*a/b*sp.log((1/rho/(1/rho+b))),
     "a_c_expr": 0.42748*R**2*T_c**2/P_c,
     "alpha_T_expr": (1+ (0.48503 + 1.5571*omega - 0.15613*omega**2)*(1-(T/T_c)**0.5))**2,
     "b_expr": 0.08664*R*T_c/P_c
 }
 
+# ============================================================ ideal gas law
 
-# actual EOS objects
+
+
+# ============================================================ Hydrogen
+H2_ideal = EOS("ideal",
+                H2,
+                H2_cp0_NIST,
+                AlphaRHelmholtz,
+                alpha_r_expr=sp.simplify(0))
+
+# ============================================================ cubic EOS presets
+
+H2_vdW = EOS("vdW",
+              H2,
+              H2_cp0_NIST,
+              AlphaRCubic,
+              **vdW)
+
+H2_PR = EOS("PR",
+             H2,
+             H2_cp0_NIST,
+             AlphaRCubic,
+             **PR)
+
+H2_RK = EOS("RK",
+             H2,
+             H2_cp0_NIST,
+             AlphaRCubic,
+             **RK)
+
+H2_MSRK = EOS("MSRK",
+               H2,
+               H2_cp0_NIST,
+               AlphaRCubic,
+               **MSRK)
+
+# ============================================================ Helmholtz EOS presets
+H2_0313 = EOS("0313",
+              H2,
+              H2_cp0_NIST,
+              AlphaRHelmholtz,
+              alpha_r_expr = alpha_r_0313())
+
+
+# ============================================================ Ammonia
+NH3_ideal = EOS("ideal",
+                NH3,
+                NH3_cp0_NIST,
+                AlphaRHelmholtz,
+                alpha_r_expr=sp.simplify(0))
+
+# ============================================================ cubic EOS presets
 NH3_vdW = EOS("vdW",
               NH3,
               NH3_cp0_NIST,
@@ -218,14 +266,6 @@ SAFT_0330 ={
         [-355.60235612, -165.20769346, -29.666905585]
     ],
 }
-
-
-epsilon = 75.092     #epsilon/k, in (K)
-sigma = 2.2677      #sigma, in (A) angstrom
-m = 2.5485          #segment length for ammonia, dimensionless
-epsilon_AB = 1041.5   #epsilon^AB/k, in (K)
-k_AB = 0.37213       #k^AB
-M = 4               #number of association sites per molecule
 
 
 # SAFT
