@@ -53,6 +53,10 @@ class Cp0():
         ...
         """
 
+        # sigmoid, to avoid usage of heaviside
+        def sigmoid(x):
+            return 1/(1+sp.exp(-x))
+
         #create the expressions from the NIST arguments
         T0, T1, T2 = temperature_list
         A, B, C, D, E, a, b, c, d, e = kwargs.values()
@@ -60,9 +64,9 @@ class Cp0():
         t = T/1000
 
         #if the temperature lies beyond the accpetable bounds it will still use the equation
-        cp0 = (A+B*t+C*t**2 + D*t**3 + E/t**2)*sp.Heaviside(-T+T1,0.5) + (a+b*t+c*t**2 + d*t**3 + e/t**2)*sp.Heaviside(T-T1,0.5 )
-        cp0_int_T = (A*t + B*t**2/2 + C*t**3/3 +D*t**4/4 - E/t)*1000*sp.Heaviside(-T+T1,0.5) + (a*t + b*t**2/2 + c*t**3/3 +d*t**4/4 - e/t)*1000*sp.Heaviside(T-T1,0.5)
-        cp0_over_T_int_T = (A*sp.log(T) + B*t + C/2*t**2 + D/3*t**3 - E/2/t**2)*sp.Heaviside(-T+T1,0.5) + (a*sp.log(T) + b*t +c/2*t**2 + d/3*t**3 - e/2/t**2)*sp.Heaviside(T-T1,0.5)
+        cp0 = (A+B*t+C*t**2 + D*t**3 + E/t**2)*sigmoid(-T+T1) + (a+b*t+c*t**2 + d*t**3 + e/t**2)*sigmoid(T-T1)
+        cp0_int_T = (A*t + B*t**2/2 + C*t**3/3 +D*t**4/4 - E/t)*1000*sigmoid(-T+T1) + (a*t + b*t**2/2 + c*t**3/3 +d*t**4/4 - e/t)*1000*sigmoid(T-T1)
+        cp0_over_T_int_T = (A*sp.log(T) + B*t + C/2*t**2 + D/3*t**3 - E/2/t**2)*sigmoid(-T+T1) + (a*sp.log(T) + b*t +c/2*t**2 + d/3*t**3 - e/2/t**2)*sigmoid(T-T1)
 
         return cls(fluid.formula, cp0, cp0_int_T, cp0_over_T_int_T)
 
