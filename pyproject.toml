@@ -1,0 +1,26 @@
+[project]
+name = "eos"
+version = "0.0.1"
+authors = [
+  { name="Cat", email="catarina.duarte-nunes18@ic.ac.uk" },
+]
+description = "A python package for the development and assessment of user defined equations of state."
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/CatDN/eos"
+Issues = "https://github.com/CatDN/eos/issues"
+
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/eos"]
