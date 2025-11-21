@@ -5,7 +5,7 @@
 from purefluid import NH3, H2
 
 # classes
-from eos import EOS
+from mordu import EOS
 from alpha_r_cubic import AlphaRCubic
 from alpha_r_helmholtz import AlphaRHelmholtz
 from alpha_r_saft import AlphaRSAFT
