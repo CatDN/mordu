@@ -49,21 +49,7 @@ class AlphaRCubic():
 
         return cls(alpha_r_expr, a_value, b_value)
 
-    #for a mixture
-    @classmethod
-    def for_mixture(cls, mix, cubic_alpha_r_list: list, mixture_rule, **kwargs):
-        z = [mix.z1, mix.z2]
-        alpha_r_expr = cubic_alpha_r_list[0].expression
 
-        a_list = [alpha_r.a for alpha_r in cubic_alpha_r_list]
-        b_list = [alpha_r.b for alpha_r in cubic_alpha_r_list]
-
-        a_ij, b_ij = mixture_rule(mix, a_list, b_list, **kwargs)  #kwargs can include delta and k_ij (binary interaction parameters)
-
-        a_mix = sum(sum(z[i]*z[j]*a_ij[i][j] for i in range(len(z))) for j in range(n))
-        b_mix = sum(sum(z[i]*z[j]*b_ij[i][j] for i in range(len(z))) for j in range(n))
-        
-        return cls(alpha_r_expr, a_mix, b_mix)
 
 
     

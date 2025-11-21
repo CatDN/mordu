@@ -1,5 +1,5 @@
 #06/05/2025
-#create all the cubic EOS
+#create all alpha_r presets
 from purefluid import H2, NH3, CH4, C2H6, N2, CO2, CH3OH, C2H5OH
 
 #symbols

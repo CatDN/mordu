@@ -81,73 +81,7 @@ class AlphaRSAFT():
 
         return cls(epsilon, sigma, m, epsilon_AB, k_AB, M, x_p, association_scheme, alpha_hs, alpha_chain, alpha_disp, alpha_assoc, alpha_multipolar)
 
-    # for a binary mixture
-    @classmethod
-    def for_mixture(cls, mix, saft_alpha_r_list: list, mixture_rule, 
-                    a:list, b:list,
-                    **kwargs):
-        z = [mix.z1, mix.z2]
-
-        m = sum(z[i]*saft_alpha_r_list[i].m for i in range(len(z)) )   # segment length of mixture
-
-        d_i = [alpha_r.sigma*(1-0.12*sp.exp(-3*alpha_r.epsilon/T)) for alpha_r in saft_alpha_r_list]    #pure fluid d
-
-        zeta_n = [pi/6 * rho * sum(z[i]*saft_alpha_r_list[i].m * d_i[i]**n for i in range(len(z))) for n in range(0,4)]
-
-        eta = zeta_n[3]
-
-        # mixture sigma and epsilon from mixture rules
-        epsilon_list = [alpha_r.epsilon for alpha_r in saft_alpha_r_list]
-        sigma_list = [alpha_r.sigma for alpha_r in saft_alpha_r_list]
-
-        epsilon_ij, sigma_ij = mixture_rule(epsilon_list, sigma_list, **kwargs)
-
-        # calculate mixture epsilon_AB_ij and k_AB_ij through mixture rules
-        k_AB_list = [alpha_r.k_AB for alpha_r in saft_alpha_r_list]
-        epsilon_AB_list = [alpha_r.epsilon_AB for alpha_r in saft_alpha_r_list]
-
-        k_AB_ij, epsilon_AB_ij = mixture_rule(k_AB_list, epsilon_AB_list)
-        
-
-
-        # hard sphere
-        alpha_hs = cls.alpha_hs(m, zeta_n).subs([(rho, rho*N_av*1e-30)])
-
-
-        # chain
-        #weighted average of component alpha_chain values
-        alpha_chain = sum(z[i]*saft_alpha_r_list[i].alpha_chain for i in range(len(z))).subs([(rho, rho*N_av*1e-30)])
-
-
-        # dispersion
-        m2e1sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * epsilon_ij[i][j]/T * sigma_ij[i][j]**3 for i in range(len(z))) for j in range(len(z)))
-        m2e2sigma3 = sum( sum(z[i]*z[j] * saft_alpha_r_list[i].m * saft_alpha_r_list[j].m * (epsilon_ij[i][j]/T)**2 * sigma_ij[i][j]**3 for i in range(len(z))) for j in range(len(z)))
-
-        alpha_disp = cls.alpha_disp(m, eta, a, b, m2e1sigma3, m2e2sigma3).subs([(rho, rho*N_av*1e-30)])
-
-
-        # association, assumes fluid 1 is non-associating and fluid 2 is associating
-        g_hs_ij = [[1/(1-zeta_n[3]) + (d_i[i]*d_i[j])*3*zeta_n[2]/(1-zeta_n[3])**2 + ((d_i[i]*d_i[j])/(d_i[i]+d_i[j]))**2 * 2*zeta_n[2]**2/(1-zeta_n[3])**3 for i in range(len(d_i))] for j in range(len(d_i))]
-
-        Delta_ij = [[g_hs_ij[i][j]*(sp.exp(epsilon_AB_ij[i][j]/T)-1) * (sigma_ij[i][j]**3 * k_AB_ij[i][j]) for i in range(len(d_i))] for j in range(len(d_i))]
-
-        x_Delta_ij = [[z[j]*Delta_ij[i][j] for i in range(len(d_i))] for j in range(len(d_i))]
-
-        Delta = x_Delta_ij[1][1]
-
-        association_scheme = saft_alpha_r_list[1].assocation_scheme
-        
-        alpha_assoc = cls.alpha_assoc(association_scheme, Delta).subs([(rho, rho*N_av*1e-30)])
-
-        # multipolar
-        # weighted average of component multipolar term values
-        x_p_i = [alpha_r.x_p for alpha_r in saft_alpha_r_list]
-        alpha_multipolar = sum(z[i]*saft_alpha_r_list[i].alpha_multipolar for i in range(len(z))).subs([(rho, rho*N_av*1e-30)])
-
-        return cls(epsilon_ij, sigma_ij, m, epsilon_AB_ij, k_AB_ij, M, x_p_i, association_scheme, alpha_hs, alpha_chain, alpha_disp, alpha_assoc, alpha_multipolar)
-    
-
-
+   
     ################################################# Static methods
     # hard sphere
     @staticmethod
