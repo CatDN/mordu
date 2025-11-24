@@ -20,7 +20,7 @@
 ```
 # mordu
 
-MOdelling Real-gases Defined by Users
+Modelling Of Real-gases Defined by Users
 
 The beginnings of a python package which focuses on the creation and usage of equations of state (EOS) for both pure fluids and mixtures.
 
