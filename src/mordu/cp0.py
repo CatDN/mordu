@@ -1,9 +1,9 @@
 #03/03/2025
 import sympy as sp
 from symbols import *   #sympy symbols
-from purefluid import PureFluid
+from .purefluid import PureFluid
 
-from purefluid import H2, NH3, CH4, N2, CO2, CH3OH , C2H5OH, C2H6, C8H18, C4H9OH, C7H16, H2O
+from .storeroom.fluids import H2, NH3, CH4, N2, CO2, CH3OH , C2H5OH, C2H6, C8H18, C4H9OH, C7H16, H2O
 
 class Cp0():
 
