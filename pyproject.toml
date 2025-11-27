@@ -1,13 +1,11 @@
 [project]
 name = "mordu"
 version = "0.0.21"
-dependencies = [
+dependencies =[
   "sympy>=1.14.0"
 ]
 authors = [
-  { name="Cat", 
-    email="catarina.duarte-nunes18@ic.ac.uk" 
-    },
+  { name="Cat", email="catarina.duarte-nunes18@ic.ac.uk" },
 ]
 description = "A python package for the development and assessment of user defined equations of state."
 readme = "README.md"
