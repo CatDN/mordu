@@ -1,11 +1,11 @@
 [project]
 name = "mordu"
-version = "0.0.23"
+version = "0.0.24"
 dependencies =[
   "sympy>=1.14.0",
-  "numpy>=",
-  "scipy>=",
-  "pandas>=",
+  "numpy>=2.3.1",
+  "scipy>=1.16.0",
+  "pandas>=2.3.0",
 ]
 authors = [
   { name="Cat", email="catarina.duarte-nunes18@ic.ac.uk" },
