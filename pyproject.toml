@@ -2,7 +2,10 @@
 name = "mordu"
 version = "0.0.23"
 dependencies =[
-  "sympy>=1.14.0"
+  "sympy>=1.14.0",
+  "numpy>=",
+  "scipy>=",
+  "pandas>=",
 ]
 authors = [
   { name="Cat", email="catarina.duarte-nunes18@ic.ac.uk" },

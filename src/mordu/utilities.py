@@ -6,7 +6,8 @@ import pandas as pd
 from scipy.spatial import distance
 import warnings
 from scipy import optimize
-from symbols import *
+
+from .symbols import *
 
 #find multiple roots of a function between a specific bracket (univariate function only)
 def multi_root(f: callable = None, bracket = None, args: tuple = (), n: int = 1000) -> np.ndarray:

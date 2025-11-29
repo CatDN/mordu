@@ -1,7 +1,7 @@
 
 from mordu.cp0 import Cp0
 from mordu.symbols import *
-from .fluids import H2, NH3, CH4, C2H6, CO2, CH3OH, C2H5OH, C8H18, C4H9OH, C7H16, H2O
+from .fluids import H2, N2, NH3, CH4, C2H6, CO2, CH3OH, C2H5OH, C8H18, C4H9OH, C7H16, H2O
 
 #define all relevant cp0 objects for hydrogen or ammonia
 

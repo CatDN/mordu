@@ -1,0 +1,208 @@
+#06/05/2025
+#create all alpha_r presets
+from .fluids import H2, NH3, CH4, C2H6, N2, CO2, CH3OH, C2H5OH
+
+#symbols
+from mordu.symbols import *
+
+# =============================== Alpha_r expressions for specific fluids
+
+# =============== Ammonia
+#alpha_r_expression from [0290]
+def alpha_r_0290():
+    """
+    Source: [0290]
+    Applicable fluids: Ammonia
+    EOS type: Helmholtz energy based
+    returns the residual reduced Helmholtz energy as a function of density and temperature
+    ---
+    out -> expression for alpha_r
+    """
+
+    #calculate Q
+    A_ij = [[-6.453022304053, -13.719926770503, -8.100620315713, -4.880096421085, -12.028775626818, 6.806345929616],
+            [8.080094367688, 14.356920005615, -45.052976699428, -166.188998570498, 37.908950229818, -40.730208333732],
+            [1.032994880724, 55.843955809332, 492.016650817652, 1737.835999472605, -30.874915263766, 71.483530416272],
+            [-8.948264632008, -169.777744139056, -1236.532371671939, -7812.161168316763, 1.779548269140, -38.974610958503],
+            [-66.922050020152, -1.753943775320, 208.553371335492, 21348.946614397509, 0, 0],
+            [247.341745995422, 299.983915547501, 4509.080578789798, -37980.849881791548, 0, 0],
+            [-306.557885430971, 24.116551098552, -9323.356799989199, 42724.098530588371, 0, 0],
+            [161.791003337459, -507.478070464266, 8139.470397409345, -27458.710626558130,0 ,0],
+            [-27.821688793683, 298.812917313344, -2772.597352058112, 7668.928677924520, 0, 0]]
+
+    tau_c = 1.2333498
+    Q =sum([sum([A_ij[i][j]*(rho)**(i)*(tau-tau_c)**(j) for j in range(0, 5+1)]) for i in range(0, 8+1)])
+
+    alpha_r = rho*Q
+
+    alpha_r = alpha_r.subs([(tau, 500/T), (rho, rho*1e-3)]) #sub in for tau and correct units of density from g/cm^3 to kg/m^3
+
+    #correct units again, and make density into molar density
+    alpha_r = alpha_r.subs([(rho, rho*NH3.M)])
+    return alpha_r
+
+#from [0298], made specifically for AMMONIA
+def alpha_r_0298():
+    """
+    Source: [0298]
+    Applicable fluids: Ammonia
+    EOS type: Helmholtz energy based
+    returns the residual reduced Helmholtz energy as a function of density and temperature
+    
+    ---
+    in -> object from fluid_store.py
+    out -> list containing alpha_r terms, which when summed equal to alpha_r expression 
+    """
+
+    #calculate Q
+    A_ij = [
+    [-6.4690439557, -13.295625875,-8.1211770915, -6.9690043553, -9.7365802349, 3.4816642617],
+    [8.8100445762, -5.0789548707, -68.261583422, -74.727156949, 49.751854179, -14.487156374],
+    [-10.467902857, 361.91907645, 1327.8270222, 1484.2843304, -82.229122939, 20.170856719],
+    [75.049574001, -2103.9451938, -7576.1007937, -8334.8746422, 43.998475959, -9.2773376718],
+    [-409.02964153, 6212.2822515, 22341.800329, 23618.791735, 0, 0],
+    [1072.479955, -10816.10642, -38259.344112, -38233.534003, 0, 0],
+    [-1471.4013145, 11195.138723, 38544.628190, 35887.294649, 0, 0],
+    [1046.2341301, -6365.7466698, -21314.815310, -18162.094974, 0, 0],
+    [-305.80081169, 1532.0616045, 5021.6962092, 3812.3691534, 0, 0] 
+    ]
+
+    tau_c = 1.2333498
+    Q =sum([sum([A_ij[i][j]*(rho)**(i)*(tau-tau_c)**(j) for j in range(0, 5+1)]) for i in range(0, 8+1)])
+
+    alpha_r = rho*Q
+
+    alpha_r = alpha_r.subs([(tau, 500/T), (rho, rho*1e-3)]) #sub in for tau and correct units of density from g/cm^3 to kg/m^3
+
+    #correct units again, and make density into molar density
+    alpha_r = alpha_r.subs([(rho, rho*NH3.M)])
+    return alpha_r
+
+
+def alpha_r_0300():
+    """
+    Source: [0300]
+    Applicable fluids: Ammonia
+    EOS type: Helmholtz energy based
+    returns the residual reduced Helmholtz energy as a function of density and temperature
+    
+    ---
+    out ->  alpha_r expression 
+    """
+
+    
+    n = [0.006132232, 1.7395866, -2.2261792, -0.30127553, 0.08967023, -0.076387037, -0.84063963, -0.27026327, 6.212578, -5.7844357, 2.4817542, -2.3739168, 0.01493697, -3.7749264, 0.0006254348, -0.000017359, -0.13462033, 0.07749072839, -1.6909858, 0.93739074]
+    t = [1, 0.382, 1, 1, 0.677, 2.915, 3.51, 1.063, 0.655, 1.3, 3.1, 1.4395, 1.623, 0.643, 1.13, 4.5, 1, 4, 4.3315, 4.015]
+    d = [4, 1, 1, 2, 3, 3, 2, 3, 1, 1, 1, 2, 2, 1, 3, 3, 1, 1, 1, 1]    
+
+    l = [2, 2, 1]
+    eta = [0.42776, 0.6424, 0.8175, 0.7995, 0.91, 0.3574, 1.21, 4.14, 22.56, 22.68, 2.8452, 2.8342]
+    beta = [1.708, 1.4865, 2.0915, 2.43, 0.488, 1.1, 0.85, 1.14, 945.64, 993.85, 0.3696, 0.2962]
+    gamma = [1.036, 1.2777, 1.083, 1.2906, 0.928, 0.934, 0.919, 1.852, 1.05897, 1.05277, 1.108, 1.313]
+    epsilon = [-0.0726, -0.1274, 0.7527, 0.57, 2.2, -0.243, 2.96, 3.02, 0.9574, 0.9576, 0.4478, 0.44689]
+    b = [1.244, 0.6826]
+
+
+    alpha_r_0300 =  sum([n[i] * delta ** d[i] * tau ** t[i] for i in range(0, 5)]) + \
+                    sum([n[i] * delta ** d[i] * tau ** t[i] * sp.exp(-delta ** l[i-5]) for i in range(5, 8)]) + \
+                    sum([n[i] * delta ** d[i] * tau ** t[i] * sp.exp(-eta[i-8] * (delta - epsilon[i-8]) ** 2 - beta[i-8] * (tau - gamma[i-8])**2) for i in range(8, 18)]) + \
+                    sum([n[i] * delta ** d[i] * tau ** t[i] * sp.exp(-eta[i-8] * (delta - epsilon[i-8]) ** 2 + 1/(beta[i-8] * (tau - gamma[i-8])**2 + b[i-18])) for i in range(18, 20)])
+
+
+    alpha_r_0300 = alpha_r_0300.subs([(delta, rho/NH3.rho_c), (tau, NH3.T_c/T)])
+
+
+    return alpha_r_0300
+
+# =============== Hydrogen
+#from [0313], made specifically for HYDROGEN
+def alpha_r_0313():
+    """
+    Source: [0313]
+    Applicable fluids: Hydrogen
+    EOS type: Helmholtz energy based
+    returns the residual reduced Helmholtz energy as a function of density and temperature
+    
+    ---
+    out -> alpha_r expression 
+    """
+
+    #residual part (non-ideal gas part)
+    #coefficient lists
+    N = [0, -6.93643, 0.01, 2.1101, 4.52059, 0.732564, -1.34086, 0.130985, -0.777414, 0.351944, -0.0211716, 0.0226312, 0.032187, -0.0231752, 0.0557346]
+    t = [0, 0.6844, 1, 0.989, 0.489, 0.803, 1.1444, 1.409, 1.754, 1.311, 4.187, 5.646, 0.791, 7.249, 2.986]
+    d = [0, 1, 4, 1, 1, 2, 2, 3, 1, 3, 2, 1, 3, 1, 1]
+    p = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
+
+    phi = [0,0,0,0,0,0,0,0,0,0,-1.685, -0.489, -0.103, -2.506, -1.607]
+    beta = [0,0,0,0,0,0,0,0,0,0, -0.171, -0.2245, -0.1304, -0.2785, -0.3967]
+    gamma = [0,0,0,0,0,0,0,0,0,0, 0.7164, 1.3444, 1.4517, 0.7204, 1.5445]
+    D = [0,0,0,0,0,0,0,0,0,0, 1.506, 0.156, 1.736, 0.67, 1.662]
+
+    l = 7
+    m = 9
+    n = 14
+
+    #calculate alpha_r
+    alpha_r =   sum([N[i]*delta**d[i]*tau**t[i] for i in range(1, l+1)]) + \
+                sum([N[i]*delta**d[i]*tau**t[i]*sp.exp(-delta**p[i]) for i in range(l+1, m+1)]) + \
+                sum([N[i]*delta**d[i]*tau**t[i]*sp.exp(phi[i]*(delta-D[i])**2 + beta[i]*(tau-gamma[i])**2) for i in range(m+1, n+1)])
+
+    #substitue delta for rho/rho_c and tau for T_c/T
+    alpha_r = alpha_r.subs([(delta, rho/H2.rho_c), (tau, H2.T_c/T)])    #since rho_c is in [mol/m3] the equations should now have the approppriate units (dimensionless but rho units must match)
+
+    return alpha_r
+
+
+# =============== Methane
+def alpha_r_0543():
+    n_i = [0, 0.4367901028e-1, 0.6709236199, -0.1765577859e1, 0.8582330241, -0.1206513052e1, 0.5120467220,
+           -0.4000010791e-3, -0.1247842423e-1, 0.3100269701e-1, 0.1754748522e-2, -0.3171921605e-5, -0.2240346840e-5,
+           0.2947056156e-6, 0.1830487909, 0.1511883679, -0.4289363877, 0.6894002446e-1, -0.1408313996e-1,
+           -0.3063054830e-1, -0.2969906708e-1, -0.1932040831e-1, -0.1105739959, 0.9952548995e-1, 0.8548437825e-2,
+           -0.6150555662e-1, -0.4291792423e-1, -0.1813207290e-1, 0.3445904760e-1, -0.2385919450e-2, -0.1159094939e-1,
+           0.6641693602e-1, -0.2371549590e-1, -0.3961624905e-1, -0.1387292044e-1, 0.3389489599e-1, -0.2927378753e-2,
+           0.9324799946e-4, -0.9324799946e1, 0.1271069467e2, -0.6423953466e1]
+    
+    d_i = [0, 1, 1, 1, 2, 2, 2, 2, 3, 4, 4, 9, 10, 1, 1, 1, 2, 4, 5, 6, 1, 2, 3, 4, 4, 3, 5, 5, 8, 2, 3, 4, 4, 4, 4, 5, 6, 2, 0, 0, 0]
+    t_i = [0, -0.5, 0.5, 1, 0.5, 1, 1.5, 4.5, 0, 1, 3, 1, 3, 3, 0, 1, 2, 0, 0, 2, 2, 5, 5, 5, 2, 4, 12, 8, 10, 10, 10, 14, 12, 18, 22, 18, 14, 2, 0, 1, 2]
+    c_i = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4]
+
+    alpha_i = [20, 40, 40, 40]
+    beta_i = [200, 250, 250, 250]
+    gamma_i = [1.07, 1.11, 1.11, 1.11]
+    Delta_i = [1, 1, 1, 1]
+
+    alpha_r = sum(n_i[i] * delta**d_i[i] * tau**t_i[i] for i in range(1, 14)) + \
+                sum(n_i[i] * delta**d_i[i] * tau**t_i[i] * sp.exp(-delta**c_i[i-14]) for i in range(14, 37)) + \
+                sum(n_i[i] * delta**d_i[i] * tau**t_i[i] * sp.exp(-alpha_i[i-37] * (delta-Delta_i[i-37])**2 - beta_i[i-37]*(tau-gamma_i[i-37])**2) for i in range(37, 41))
+    
+    alpha_r = alpha_r.subs([(delta, rho/CH4.rho_c), (tau, CH4.T_c/T)])
+
+    return alpha_r
+
+# =============== Nitrogen
+def alpha_r_0542():
+    N_k = [0, 0.924803575275 , -0.492448489428, 0.661883336938, -1.92902649201, -0.0622469309629, 0.349943957581,
+            0.564857472498 , -1.61720005987, -0.481395031883, 0.421150636384, -1.61962230825, 0.172100994165,
+            0.735448924933e-2, 0.168077305479e-1, -0.107626664179e-2, -0.137318088513e-1, 0.635466899859e-3, 0.304432279419e-2,
+            -0.435762336045e-1, -0.7231748893163e-1, 0.389644315272e-1, -0.212201363910e-1, 0.408822981509e-2, -0.551990017984e-4,
+            -0.462016716479e-1, -0.300311716011e-2, 0.368825891208e-1, -0.255856846220e-2, 0.896915264558e-2, -0.441513370350e-2,
+            0.133722924858e-2,  0.264832491957e-3, 0.196688194015e2, -0.209115600730e2, 0.167788306989e-1, 0.262767566274e4]
+    
+    i_k = [0, 1, 1, 2, 2, 3, 3, 1, 1, 1, 3, 3, 4, 6, 6, 7, 7, 8, 8, 1, 2, 3, 4, 5, 8, 4, 5, 5, 8, 3, 5, 6, 9, 1, 1, 3, 2 ]
+    j_k = [0, 0.25, 0.875, 0.5, 0.875, 0.375, 0.75, 0.5, 0.75, 2, 1.25, 3.5, 1, 0.5, 3, 0, 2.75, 0.75, 2.5, 4, 6, 6, 3, 3, 6, 16, 11, 15, 12, 12, 7, 4, 16, 0, 1, 2, 3]
+    l_k = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 2, 2, 2, 2 ]
+
+    sigma_k = [20, 20, 15, 25]
+    beta_k = [325,325,300,275]
+    gamma_k = [1.16,1.16,1.13,1.25]
+
+
+    alpha_r = sum(N_k[k] * delta**i_k[k] * tau**j_k[k] for k in range(1, 7)) + \
+                sum(N_k[k] * delta**i_k[k] * tau**j_k[k] * sp.exp(-delta**l_k[k]) for k in range(7, 33)) + \
+                sum(N_k[k] * delta**i_k[k] * tau**j_k[k] * sp.exp(-sigma_k[k-33] * (delta-1)**2 - beta_k[k-33]*(tau-gamma_k[k-33])**2) for k in range(33, 37))
+    
+    alpha_r = alpha_r.subs([(delta, rho/N2.rho_c), (tau, N2.T_c/T)])
+
+    return alpha_r

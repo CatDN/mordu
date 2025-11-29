@@ -2,22 +2,21 @@
 
 # create presets for all the pure fluid EOS relevant to the paper
 
-from purefluid import NH3, H2
 
 # classes
-from mordu import EOS
-from alpha_r_cubic import AlphaRCubic
-from alpha_r_helmholtz import AlphaRHelmholtz
-from alpha_r_saft import AlphaRSAFT
+from mordu.eos import EOS
+from mordu.alpha_r_cubic import AlphaRCubic
+from mordu.alpha_r_helmholtz import AlphaRHelmholtz
+from mordu.alpha_r_saft import AlphaRSAFT
 
 # objects
-from purefluid import NH3, H2
-from cp0 import NH3_cp0_NIST, H2_cp0_NIST 
-from presets_alpha_r import alpha_r_0290, alpha_r_0298, alpha_r_0300, alpha_r_0313
+from .fluids import NH3, H2
+from .cp0s import NH3_cp0_NIST, H2_cp0_NIST 
+from .alpha_r_func import alpha_r_0290, alpha_r_0298, alpha_r_0300, alpha_r_0313
 
 # algorithms and other functions and variables
-from symbols import *
-from other_functions import multi_root
+from mordu.symbols import *
+from mordu.utilities import multi_root
 
 # ============================================================ cubic EOS presets
 # dictionaries for cubic EOS parameters for ammonia
