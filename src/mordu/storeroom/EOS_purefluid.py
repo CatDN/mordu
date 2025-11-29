@@ -1,8 +1,6 @@
 # 07/11/2025
 
 # create presets for all the pure fluid EOS relevant to the paper
-
-
 # classes
 from mordu.eos import EOS
 from mordu.alpha_r_cubic import AlphaRCubic
@@ -16,7 +14,6 @@ from .alpha_r_func import alpha_r_0290, alpha_r_0298, alpha_r_0300, alpha_r_0313
 
 # algorithms and other functions and variables
 from mordu.symbols import *
-from mordu.utilities import multi_root
 
 # ============================================================ cubic EOS presets
 # dictionaries for cubic EOS parameters for ammonia
