@@ -2,7 +2,6 @@
 from .symbols import *   #sympy symbols
 from .purefluid import PureFluid
 
-from .storeroom.fluids import H2, NH3, CH4, N2, CO2, CH3OH , C2H5OH, C2H6, C8H18, C4H9OH, C7H16, H2O
 
 # ideal gas isobaric heat capacity
 class Cp0():

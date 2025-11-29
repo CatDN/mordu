@@ -1,5 +1,5 @@
 #03/03/2025
-from symbols import *
+from .symbols import *
 
 # reference state class, stored here because its only used here
 class ReferenceState():

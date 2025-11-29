@@ -1,6 +1,6 @@
 #19/08/2025
 
-from symbols import *
+from .symbols import *
 
 # non dimensional residual Helmholtz energy for Helmholtz EOS
 class AlphaRHelmholtz():

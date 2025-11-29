@@ -1,7 +1,7 @@
 #06/05/2025
 
 #sympy symbols
-from symbols import *
+from .symbols import *
 
 # cubic non dimensional residual Helmholts energy class
 # necessary to create any cubic EOS for a pure fluid

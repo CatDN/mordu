@@ -1,6 +1,6 @@
 # 30/09/2025
 
-from symbols import *
+from .symbols import *
 
 # non dimensional Helmholtz energy for SAFT EOS
 class AlphaRSAFT():

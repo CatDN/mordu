@@ -1,10 +1,9 @@
 #27/02/2025
+
+from .alpha_0 import Alpha0
+from .symbols import *
+
 #EOS parent class
-import sympy as sp
-from alpha_0 import Alpha0
-
-from symbols import *
-
 class EOS:
 
     def __init__(self, name:str, fluid, cp0_object, AlphaRClass, **kwargs):
