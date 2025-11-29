@@ -2,6 +2,7 @@
 
 from symbols import *
 
+# non dimensional Helmholtz energy for SAFT EOS
 class AlphaRSAFT():
     
     def __init__(self, epsilon:float, sigma:float, m:float, epsilon_AB:float, k_AB:float, M:int, x_p:float, assocation_scheme:str,

@@ -2,6 +2,7 @@
 
 from symbols import *
 
+# non dimensional residual Helmholtz energy for Helmholtz EOS
 class AlphaRHelmholtz():
     
     def __init__(self, alpha_r_expr: sp.core.add.Add ):

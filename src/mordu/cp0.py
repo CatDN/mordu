@@ -4,8 +4,10 @@ from .purefluid import PureFluid
 
 from .storeroom.fluids import H2, NH3, CH4, N2, CO2, CH3OH , C2H5OH, C2H6, C8H18, C4H9OH, C7H16, H2O
 
+# ideal gas isobaric heat capacity
 class Cp0():
 
+    #it is possible to define it using the expressions themselves
     def __init__(self, fluid_formula, cp0_expression, cp0_int_T_expresion=None, cp0_over_T_intT_T_expression=None):
         self.fluid_formula = fluid_formula
         self.cp0 = cp0_expression
@@ -26,7 +28,7 @@ class Cp0():
             self.cp0_int_T = cp0_int_T_expresion
             self.cp0_over_T_int_T = cp0_over_T_intT_T_expression
 
-
+    # or define it using the NIST values
     @classmethod
     def from_NIST(cls, fluid: type[PureFluid] , temperature_list: list[float, float, float],**kwargs):
         """
@@ -69,6 +71,7 @@ class Cp0():
 
         return cls(fluid.formula, cp0, cp0_int_T, cp0_over_T_int_T)
 
+    # or define it using the [0421] values
     @classmethod
     def from_0421(cls, fluid: type[PureFluid] , temperature_list: list[float, float],**kwargs):
         """
