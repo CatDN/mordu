@@ -138,7 +138,6 @@ CH3OH = PureFluid(
         dipole = 1.7                    # [debye], source = [0421] page 738
         )
 
-
 #ethanol
 C2H5OH = PureFluid(
         name = "ethanol",
@@ -218,7 +217,6 @@ H2O = PureFluid(
         Sutherland_mu0 = 1.12e-5,       # [N s/m2], source = "Viscous Fluid Flow" page 28 (steam)
         dipole = 1.8                    # [debye], source = [0421] page 752
         )
-
 
 #carbon dioxide
 CO2 = PureFluid(

@@ -15,6 +15,7 @@ from .alpha_r_func import alpha_r_0290, alpha_r_0298, alpha_r_0300, alpha_r_0313
 # algorithms and other functions and variables
 from mordu.symbols import *
 
+
 # ============================================================ cubic EOS presets
 # dictionaries for cubic EOS parameters for ammonia
 vdW = {
@@ -59,35 +60,35 @@ H2_ideal = EOS("ideal",
 # ============================================================ cubic EOS presets
 
 H2_vdW = EOS("vdW",
-              H2,
-              H2_cp0_NIST,
-              AlphaRCubic,
-              **vdW)
+            H2,
+            H2_cp0_NIST,
+            AlphaRCubic,
+            **vdW)
 
 H2_PR = EOS("PR",
-             H2,
-             H2_cp0_NIST,
-             AlphaRCubic,
-             **PR)
+            H2,
+            H2_cp0_NIST,
+            AlphaRCubic,
+            **PR)
 
 H2_RK = EOS("RK",
-             H2,
-             H2_cp0_NIST,
-             AlphaRCubic,
-             **RK)
+            H2,
+            H2_cp0_NIST,
+            AlphaRCubic,
+            **RK)
 
 H2_MSRK = EOS("MSRK",
-               H2,
-               H2_cp0_NIST,
-               AlphaRCubic,
-               **MSRK)
+            H2,
+            H2_cp0_NIST,
+            AlphaRCubic,
+            **MSRK)
 
 # ============================================================ Helmholtz EOS presets
 H2_0313 = EOS("0313",
-              H2,
-              H2_cp0_NIST,
-              AlphaRHelmholtz,
-              alpha_r_expr = alpha_r_0313())
+            H2,
+            H2_cp0_NIST,
+            AlphaRHelmholtz,
+            alpha_r_expr = alpha_r_0313())
 
 
 # ============================================================ Ammonia
@@ -99,28 +100,28 @@ NH3_ideal = EOS("ideal",
 
 # ============================================================ cubic EOS presets
 NH3_vdW = EOS("vdW",
-              NH3,
-              NH3_cp0_NIST,
-              AlphaRCubic,
-              **vdW)
+            NH3,
+            NH3_cp0_NIST,
+            AlphaRCubic,
+            **vdW)
 
 NH3_PR = EOS("PR",
-             NH3,
-             NH3_cp0_NIST,
-             AlphaRCubic,
-             **PR)
+            NH3,
+            NH3_cp0_NIST,
+            AlphaRCubic,
+            **PR)
 
 NH3_RK = EOS("RK",
-             NH3,
-             NH3_cp0_NIST,
-             AlphaRCubic,
-             **RK)
+            NH3,
+            NH3_cp0_NIST,
+            AlphaRCubic,
+            **RK)
 
 NH3_MSRK = EOS("MSRK",
-               NH3,
-               NH3_cp0_NIST,
-               AlphaRCubic,
-               **MSRK)
+            NH3,
+            NH3_cp0_NIST,
+            AlphaRCubic,
+            **MSRK)
 
 # ============================================================ Helmholtz EOS presets
 NH3_0290 = EOS("0290",
@@ -268,5 +269,5 @@ SAFT_0330 ={
 NH3_0323 = EOS("0323", NH3, NH3_cp0_NIST, AlphaRSAFT, **SAFT_0323)
 NH3_0324 = EOS("0324", NH3, NH3_cp0_NIST, AlphaRSAFT, **SAFT_0324)
 NH3_0328 = EOS("0328", NH3, NH3_cp0_NIST, AlphaRSAFT, **SAFT_0328,
-               alpha_disp=alpha_disp)
+            alpha_disp=alpha_disp)
 NH3_0330 = EOS("0330", NH3, NH3_cp0_NIST, AlphaRSAFT, **SAFT_0330)
