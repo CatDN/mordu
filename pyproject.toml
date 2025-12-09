@@ -1,6 +1,6 @@
 [project]
 name = "mordu"
-version = "0.0.242"
+version = "0.0.25"
 dependencies =[
   "sympy>=1.14.0",
   "numpy>=2.3.1",
