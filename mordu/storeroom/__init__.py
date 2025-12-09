@@ -1,7 +1,6 @@
 """Lazy-load storeroom submodules/objects on attribute access (PEP 562)."""
 
 import importlib
-from types import ModuleType
 from typing import Dict
 
 # map attribute names to module paths under mordu.storeroom
