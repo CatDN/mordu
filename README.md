@@ -20,13 +20,13 @@
 ```
 # mordu
 
-Modelling Of Real-gases Defined by Users
+Modelling Of Real-fluids Defined by Users
 
 The beginnings of a python package which focuses on the creation and usage of equations of state (EOS) for both pure fluids and mixtures.
 
-For now, mixtures will be limited to binary mixtures, as it is what currently interests me but will in the future be expanded for any mixture.
+For now the package is limited to pure fluids, but will be adding mixture EOS in the future.
 
 The package will allow the user to define their own fluids and equations of state to then calculate fluid thermodynamic properties at a certain state.
 
-Further functionality includes vapour liquid equilibria algorithms and P-x diagram creation.
+Future functionality will include vapour liquid equilibria algorithms and P-x diagram creation.
 
