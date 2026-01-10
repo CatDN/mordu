@@ -78,7 +78,7 @@ class AlphaRSAFT():
 
         # multipolar
         if alpha_multipolar ==None:
-            alpha_multipolar = cls.alpha_multipolar(fluid, sigma, x_p).subs([(rho, rho*N_av*1e-30)])
+            alpha_multipolar = cls.alpha_multipolar(fluid, 1, sigma, x_p).subs([(rho, rho*1e-6)])
 
         return cls(epsilon, sigma, m, epsilon_AB, k_AB, M, x_p, association_scheme, alpha_hs, alpha_chain, alpha_disp, alpha_assoc, alpha_multipolar)
 
@@ -191,23 +191,44 @@ class AlphaRSAFT():
     
     # multipolar
     @staticmethod
-    def alpha_multipolar(fluid, sigma, x_p):
+    def alpha_multipolar(fluid: object , z: float , sigma: float, x_p: float):
+        # # new multipolar variation based on [0324], [0326] and [0333] only
+        # # see logging 2025-12-20
         mu = fluid.dipole   # in Debyes
 
         # non dimensional variables
-        rho_star = rho*sigma**3                                         # non dimensional number density
+        rho_star = rho*N_av*(sigma*1e-8)**3                                         # non dimensional number density, [0334]
 
-        mu_star = mu*1e-18/(k_b_Gaussian*T*(sigma*1e-8)**3)**0.5
-        T_star = 1/mu_star**2
+        mu_star = mu*1e-18/(k_b_Gaussian*T*(sigma*1e-8)**3)**0.5        #non dimensional dipole moment []
+        T_star = 1/mu_star**2  
 
-        #I2 and I3 expressions which simplify the calculation of the multipolar term, these are different from the dispersion ones
-        I2 = (1 - 0.3618*rho_star - 0.3205*rho_star**2 + 0.1078*rho_star**3)/(1-0.5236*rho_star)**2
+        J_6 = sp.exp(-0.488498 * rho_star**2 * sp.log(T_star) + 
+                     0.863195*rho_star**2 + 
+                     0.761344*rho_star*sp.log(T_star) +
+                     -0.750086*rho_star +
+                     -0.218562*sp.log(T_star) +
+                     -0.538463)
 
-        I3 = (1 + 0.62378*rho_star - 0.11658*rho_star**2)/(1-0.59056*rho_star + 0.20059*rho_star**2)
+        alpha_2 = -2/3 * pi * rho * N_av/(k_b_Gaussian**2 * T**2) * z**2 * x_p**2 * (mu*1e-18)**4 / (sigma*1e-8)**3 *J_6
 
-        #now calculate the multipolar term
-        alpha_multipolar = (-2*pi/9 * (1/T_star)**2 * rho_star * x_p**2 * I2) / (1 + 5*pi/36 * 1/T_star * rho_star * x_p *I3/I2)
+        # A_2 = -2/3 * pi * N_av*rho/(k_b*T) * z**2 * x_p**2 * mu**4 * 1/sigma**3 * J_6
+
+        K = sp.exp( -1.050534 * rho_star**2 * sp.log(T_star) + 
+                    1.747476 * rho_star**2 + 
+                    1.749366 * rho_star*sp.log(T_star) +
+                    -1.999227 * rho_star +
+                    -0.661046 *sp.log(T_star) +
+                    -3.028720)
+
+        alpha_3 = 32/135 * pi**3 * (14*pi/5)**0.5 * N_av**2 *rho**2 / (k_b_Gaussian * T)**3 * z**3 * x_p**3 * (mu*1e-18)**6 * 1/(sigma*1e-8)**3 * K
+
+        # A_3 = 32/135 * pi**3 * (14*pi/5)**0.5 * N_av*rho**2/(k_b*T)**2 * z**3 * x_p**3 * mu**6 * 1/sigma**3 * K
+
+        # A_multipolar = A_2/(1- A_3/A_2)
+        alpha_multipolar = alpha_2/(1-alpha_3/alpha_2) 
 
         return alpha_multipolar
+    
+    
     
     
