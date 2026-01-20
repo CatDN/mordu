@@ -178,7 +178,7 @@ def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
             "k_AB": 3.27e-2,           #k^AB
             "M": 3,                   #number of association sites per molecule
             "association_scheme": "3B",
-            "alpha_disp_expr": alpha_disp
+            "alpha_disp": alpha_disp
         }
 
     elif kind == "0330":
