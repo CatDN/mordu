@@ -4,25 +4,46 @@ from dataclasses import dataclass
 # class for storing pure fluid data
 @dataclass
 class PureFluid():
-        """Class for creating pure fluids through their properties, all properties should be in SI units unless otherwise specified:
+        """ Class for creating a pure fluid based on its properties
 
-        name -> name of fluid
-        formula -> molecular formula of fluid according to iupac
-        M -> molar mass of fluid in [kg/m3] (SI)
-        P_c -> pressure at critical point in [Pa]
-        T_c -> temperature at critical point in [K]
-        rho_c -> density at critical point in [kg/m3]
-        P_t -> pressure at triple point in [Pa]
-        T_t -> temperature at triple point [K]
-        rho_t -> density at triple point in [kg/m3]
-        omega -> accentric factor of pure fluid, see Wikipedia, also known as omega
-        sigma -> Lennard-Jones characteristic length in [m], can be obtained from [0421] pages 779 onwards
-        epsilon -> Lennard-Jones characteristic energy over boltzmann constant in [K], can be obtained from [0421] pages 779 onwards
-        Sutherland_S -> Sutherland's constant used in the calculation of viscosity, see "Viscous Fluid Flow" for more information and numbers, in [K]
-        Sutherland_T0 -> Sutherland's reference temperature used in the calculation of viscosity, in [K]
-        Sutherland_mu0 -> Sutherland's reference viscosity used in the calculation of viscosity, in [Ns/m^2]
-        dipole -> the dipole moment, measure of the polarity of a molecule, in [debyes]
-        """        
+        This class stores all the properties which define a fluid. These properties are then used
+        when creating an equation of state for the particular fluid.
+
+        Attributes
+        ----------
+        name: str
+            Name of the fluid
+        formula: str
+			IUPAC formula of the fluid
+        M: float
+			Molar mass in [kg/mol]
+        P_c: float
+			Critical point pressure in [Pa]
+		T_c: float
+            Critical point temperature in [K]
+        rho_c: float
+            Critical point density in [mol/m3]
+        P_t: float
+            Triple point pressure in [Pa]
+        T_t: float
+            Triple point temperature in [K]
+        rho_t: float
+            Triple point temperature of the vapour in [mol/m3]
+        omega: float
+            Accentric factor in []
+        sigma: float
+            Lennard-Jones characteristic length in [m]
+        epsilon: float
+            Lennard-Jones characteristic energy over the Boltzmann constant in [K]
+        Sutherland_S: float
+            Sutherland's constant for the calculation of viscosity in [K]
+        Sutherland_T0: float
+            Sutherland's reference temperature for the calculation of viscosity in [K]
+        Sutherland_mu0: float
+            Sutherland's reference viscosity for the calculation of viscosity in [Ns/m2]
+        dipole: float
+            Dipole moment of the fluid molecule in [D] (debyes)
+        """     
         name: str
         formula: str
         M: float
