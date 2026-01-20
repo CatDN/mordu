@@ -8,7 +8,8 @@ from scipy import optimize
 
 from .symbols import *
 
-#find multiple roots of a function given logarithmically spaced x values (univariate function only)
+# find multiple roots of a function given logarithmically spaced x values (univariate function only)
+# recommended over multi_root if used multiple times with the same x
 def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = ()) -> np.ndarray:
     """ Find all roots of f in `bracket`, given that resolution `n` covers the sign change.
     Fine-grained root finding is performed with `scipy.optimize.root_scalar`.
@@ -29,9 +30,7 @@ def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = ()) -> 
     roots: np.ndarray
         Array containing all unique roots that were found in `bracket`.
     """
-    # Evaluate function in given bracket
-    # x = np.logspace(*bracket, int(n))
-
+    # Evaluate function in given x
     y = f(x, *args)
 
     # Find where adjacent signs are not equal
