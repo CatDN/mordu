@@ -49,7 +49,7 @@ def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol
     roots = roots[f(roots, *args)<tol]
 
     # sort the roots in ascending order
-    roots = roots.sort()
+    roots.sort()
 
     return roots   
 
