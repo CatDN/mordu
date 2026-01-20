@@ -4,7 +4,7 @@
 from .symbols import *
 
 #pure fluid object
-from purefluid import PureFluid
+from .purefluid import PureFluid
 
 # cubic non dimensional residual Helmholts energy class
 # necessary to create any cubic EOS for a pure fluid

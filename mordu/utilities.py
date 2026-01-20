@@ -10,26 +10,28 @@ from .symbols import *
 
 # find multiple roots of a function given logarithmically spaced x values (univariate function only)
 # recommended over multi_root if used multiple times with the same x
-def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = ()) -> np.ndarray:
-    """ Find all roots of f in `bracket`, given that resolution `n` covers the sign change.
+def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol: float = 1) -> np.ndarray:
+    """ Find all roots of f in given an x array.
+
     Fine-grained root finding is performed with `scipy.optimize.root_scalar`.
+
     Parameters
     ----------
     f: Callable
         Function to be evaluated
-    bracket: Sequence of two floats
-        Specifies interval within which roots are searched in log space.
+    x: np.ndarray
+        Array with values at which callable f is evaluated.
     args: Iterable, optional
         Iterable passed to `f` for evaluation
-    n: int
-        Number of points sampled equidistantly from bracket to evaluate `f`.
-        Resolution has to be high enough to cover sign changes of all roots but not finer than that.
-        Actual roots are found using `scipy.optimize.root_scalar`.
+    tol: float = 1
+        Absolute tolerance for the discontinuity check of the root
+
     Returns
     -------
     roots: np.ndarray
         Array containing all unique roots that were found in `bracket`.
     """
+    
     # Evaluate function in given x
     y = f(x, *args)
 
@@ -42,7 +44,7 @@ def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = ()) -> 
     roots = np.array(roots)     # array conversion needed for discontinuity check
 
     # check for discontinuities and erase if present
-    roots = roots[f(roots)<1e0]
+    roots = roots[f(roots)<tol]
 
     # sort the roots in ascending order
     roots = roots.sort()
