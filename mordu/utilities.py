@@ -7,6 +7,8 @@ from scipy.spatial import distance
 from scipy import optimize
 
 from .symbols import *
+from .purefluid import PureFluid
+from .eos import EOS
 
 # find multiple roots of a function given logarithmically spaced x values (univariate function only)
 # recommended over multi_root if used multiple times with the same x
@@ -44,7 +46,7 @@ def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol
     roots = np.array(roots)     # array conversion needed for discontinuity check
 
     # check for discontinuities and erase if present
-    roots = roots[f(roots)<tol]
+    roots = roots[f(roots, *args)<tol]
 
     # sort the roots in ascending order
     roots = roots.sort()
@@ -142,21 +144,27 @@ def calc_rho_inverse_distance(df_missing_rho, df_experimental, pascals=1e4, neig
 
     return df[["Paper", "P", "T", "rho"]]   #return the  dataframe but only Paper, P, T, rho
 
-def calc_Psat(fluid, EOS, temperature_list: list):
+def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list):
     """
     Calculate the saturation pressure of a fluid at given temperatures.
 
-    Parameters:
-    fluid: The fluid object containing properties like critical and triple point temperatures.
-    EOS: The equation of state object used for pressure and fugacity calculations.
-    temperature_list (list): A list of temperatures at which to calculate saturation pressures.
+    Parameters
+    ----------
+    fluid: PureFluid
+        The fluid object containing properties like critical and triple point temperatures.
+    eos: EOS
+        The equation of state object used for pressure and fugacity calculations.
+    temperature_list: list
+        A list of temperatures at which to calculate saturation pressures.
 
-    Returns:
-    list: A list of calculated saturation pressures corresponding to the input temperatures.
+    Returns
+    -------
+    P_sat: list
+        A list of calculated saturation pressures corresponding to the input temperatures.
     """
     
-    pressure_equation = sp.utilities.lambdify((rho, T, P), P - EOS.pressure)
-    fugacity_coefficient_function = sp.utilities.lambdify((rho, T), EOS.fugacity_coefficient)
+    pressure_equation = sp.utilities.lambdify((rho, T, P), P - eos.pressure)
+    fugacity_coefficient_function = sp.utilities.lambdify((rho, T), eos.fugacity_coefficient)
 
     def get_pressure_guess(temperature):
         """
@@ -172,7 +180,7 @@ def calc_Psat(fluid, EOS, temperature_list: list):
         n_roots = 0
         while n_roots < 3:
             pressure_guess += 1e2
-            density_roots = multi_root(pressure_equation, [1e-4, 1e4], args=(temperature, pressure_guess))
+            density_roots = multi_root(pressure_equation, [-4, 4], args=(temperature, pressure_guess))
             n_roots = len(density_roots)
         return pressure_guess
 
@@ -187,7 +195,7 @@ def calc_Psat(fluid, EOS, temperature_list: list):
         Returns:
         float: The result of the fugacity ratio equation.
         """
-        density_roots = multi_root(pressure_equation, [1e-4, 1e4], args=(temperature, pressure))
+        density_roots = multi_root(pressure_equation, [-4, 4], args=(temperature, pressure))
         fugacities = fugacity_coefficient_function(density_roots, temperature)
         fugacities = fugacities[fugacities != max(fugacities)]
         eq = fugacities[0] / fugacities[1] - 1
