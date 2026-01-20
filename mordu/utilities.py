@@ -145,8 +145,7 @@ def calc_rho_inverse_distance(df_missing_rho, df_experimental, pascals=1e4, neig
     return df[["Paper", "P", "T", "rho"]]   #return the  dataframe but only Paper, P, T, rho
 
 def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list):
-    """
-    Calculate the saturation pressure of a fluid at given temperatures.
+    """Calculate the saturation pressure of a fluid at given temperatures.
 
     Parameters
     ----------
@@ -165,37 +164,45 @@ def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list):
     
     pressure_equation = sp.utilities.lambdify((rho, T, P), P - eos.pressure)
     fugacity_coefficient_function = sp.utilities.lambdify((rho, T), eos.fugacity_coefficient)
+    densities = np.logspace(-4,4, int(1e3))
 
-    def get_pressure_guess(temperature):
-        """
-        Get an initial pressure guess for a specified temperature.
+    def get_pressure_guess(temperature: float) -> float:
+        """Get an initial pressure guess for a specified temperature.
 
-        Parameters:
-        temperature: The temperature for which to estimate the pressure.
+        Parameters
+        ----------
+        temperature: float
+            The temperature for which to estimate the pressure.
 
-        Returns:
-        float: An initial pressure guess.
+        Returns
+        -------
+        pressure_guess: float
+            An initial pressure guess.
         """
         pressure_guess = fluid.P_t# + (fluid.P_c - fluid.P_t) * (temperature - fluid.T_t) / (fluid.T_c - fluid.T_t)
         n_roots = 0
         while n_roots < 3:
             pressure_guess += 1e2
-            density_roots = multi_root(pressure_equation, [-4, 4], args=(temperature, pressure_guess))
+            density_roots = multi_root_x(pressure_equation, densities, args=(temperature, pressure_guess))
             n_roots = len(density_roots)
         return pressure_guess
 
-    def calc_saturation_pressure(pressure, temperature):
-        """
-        Calculate the saturation pressure from temperature and initial pressure guess.
+    def calc_saturation_pressure(pressure: float, temperature: float) -> float:
+        """ This is the function for which finding the root yields the saturation pressure
 
-        Parameters:
-        pressure: The initial pressure guess.
-        temperature: The temperature for which to calculate saturation pressure.
+        Parameters
+        ----------
+        pressure: float
+            The initial pressure guess.
+        temperature:  float
+            The temperature for which to calculate saturation pressure.
 
-        Returns:
-        float: The result of the fugacity ratio equation.
+        Returns
+        -------
+        eq: float
+            The result of the fugacity ratio equation.
         """
-        density_roots = multi_root(pressure_equation, [-4, 4], args=(temperature, pressure))
+        density_roots = multi_root_x(pressure_equation, densities, args=(temperature, pressure))
         fugacities = fugacity_coefficient_function(density_roots, temperature)
         fugacities = fugacities[fugacities != max(fugacities)]
         eq = fugacities[0] / fugacities[1] - 1
