@@ -4,13 +4,12 @@
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance
-import warnings
 from scipy import optimize
 
 from .symbols import *
 
-#find multiple roots of a function between a specific bracket (univariate function only)
-def multi_root(f: callable = None, bracket = None, args: tuple = (), n: int = 1000) -> np.ndarray:
+#find multiple roots of a function given logarithmically spaced x values (univariate function only)
+def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = ()) -> np.ndarray:
     """ Find all roots of f in `bracket`, given that resolution `n` covers the sign change.
     Fine-grained root finding is performed with `scipy.optimize.root_scalar`.
     Parameters
@@ -31,52 +30,33 @@ def multi_root(f: callable = None, bracket = None, args: tuple = (), n: int = 10
         Array containing all unique roots that were found in `bracket`.
     """
     # Evaluate function in given bracket
-
-    # x = np.linspace(*bracket, int(n))
-    x = np.logspace(*bracket, int(n))
+    # x = np.logspace(*bracket, int(n))
 
     y = f(x, *args)
 
     # Find where adjacent signs are not equal
-    sign_changes = np.where(np.sign(y[:-1]) != np.sign(y[1:]))[0]
+    sign = np.sign(y)
+    sign_changes = np.where(sign[:-1] != sign[1:])[0]
 
-    # Find roots around sign changes
-    root_finders = (
-        optimize.root_scalar(
-            method="bisect",
-            f=f,
-            args=args,
-            bracket=(x[s], x[s+1]),
-            xtol=1e-12, rtol=1e-12
-        )
-        for s in sign_changes
-    )
+    # find roots around sign changes usign the brentq method
+    roots = [optimize.brentq(f=f,a=x[s], b= x[s+1], xtol=1e-8) for s in sign_changes]
+    roots = np.array(roots)     # array conversion needed for discontinuity check
 
-    roots = np.array([
-        r.root if r.converged else np.nan
-        for r in root_finders
-    ])
-
-
-    if np.any(np.isnan(roots)):
-        warnings.warn("Not all root finders converged for estimated brackets! Maybe increase resolution `n`.")
-        roots = roots[~np.isnan(roots)]
-
-    roots_unique = np.unique(roots)
-    if len(roots_unique) != len(roots):
-        warnings.warn("One root was found multiple times. "
-                    "Try to increase or decrease resolution `n` to see if this warning disappears.")
-
-    #check if the roots correspond to actual roots or a discontinuity
-    #if inputting the root into the function results in a distance higher than 1 then assume its not a root and assign None
-    roots_unique[abs(f(roots_unique, *args)) > 1e0] = None
-    roots_unique = roots_unique[~np.isnan(roots_unique)]
+    # check for discontinuities and erase if present
+    roots = roots[f(roots)<1e0]
 
     # sort the roots in ascending order
-    roots_unique = np.sort(roots_unique)
+    roots = roots.sort()
 
+    return roots   
 
-    return roots_unique   
+# find multiple roots of a function between a given bracket (univariate functions only)
+def multi_root(f: callable = None, bracket: list = [], args: tuple = (), n: int = 0) -> np.ndarray:
+    x = np.logspace(*bracket, n)
+
+    roots = multi_root_x(f, x, args)
+
+    return roots
 
 #choose the best root from a list by knowing the experimental value
 def choose_root(roots: list, experimental_value=0):
