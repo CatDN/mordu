@@ -1,6 +1,6 @@
 # 07/11/2025
 
-# create presets for all the pure fluid EOS relevant to the paper
+# create presets for all the pure fluid EOS relevant to the paper and thesis
 # classes
 import importlib
 
@@ -113,7 +113,7 @@ def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
             "association_scheme": "2B",
         }
 
-    if kind == "0324":
+    elif kind == "0324":
         SAFT_params = {
             "epsilon": 204.63,      #epsilon/k, in (K)
             "sigma": 3.2386,          #sigma, in (A) angstrom
@@ -144,7 +144,7 @@ def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
             ]
         }
 
-    if kind == "0328":
+    elif kind == "0328":
         epsilon = 283.18
         sigma = 3.3476
         m = 1.503
@@ -181,7 +181,7 @@ def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
             "alpha_disp_expr": alpha_disp
         }
 
-    if kind == "0330":
+    elif kind == "0330":
         SAFT_params = {
             "epsilon": 75.092,      #epsilon/k, in (K)
             "sigma": 2.2677,          #sigma, in (A) angstrom
@@ -210,7 +210,7 @@ def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
             ],
         }
     
-    if kind == "0552":
+    elif kind == "0552":
         SAFT_params ={
             "epsilon": 30.32,
             "sigma":2.86,
@@ -241,7 +241,7 @@ def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
 
 # lazy object dictionary
 _lazy_objects = {
-    # idela gas law
+    # ideal gas law
     "NH3_ideal": lambda: create_ideal( "NH3" ,"NH3_cp0_NIST"),
     "H2_ideal": lambda: create_ideal( "H2", "H2_cp0_NIST"),
     

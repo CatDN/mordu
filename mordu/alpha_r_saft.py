@@ -193,7 +193,7 @@ class AlphaRSAFT():
     @staticmethod
     def alpha_multipolar(fluid: object , z: float , sigma: float, m: float, x_p: float):
         if x_p == 0:
-            return 0
+            return sp.sympify(0)
 
         # # new multipolar variation based on [0324], [0326] and [0333] only
         # # see logging 2025-12-20
