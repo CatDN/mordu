@@ -17,10 +17,15 @@ def get_cp0(name:str):
     statement = f"importlib.import_module('.cp0s', 'mordu.storeroom').{name}"
     return eval(statement)
 
+def get_alpha_r_func(name:str):
+    statement = f"importlib.import_module('.alpha_r_func', 'mordu.storeroom').alpha_r_{name}"
+    return eval(statement)
+
+
 def create_ideal(fluid:str, cp0:str):
     from mordu.alpha_r_helmholtz import AlphaRHelmholtz
 
-    return EOS("ideal", get_fluid(fluid) ,get_cp0(cp0), AlphaRHelmholtz, alpha_r_expr=sp.simplify(0))
+    return EOS("ideal", get_fluid(fluid) ,get_cp0(cp0), AlphaRHelmholtz, alpha_r_expr=sp.sympify(0))
 
 def create_cubic(kind : str = "", fluid : str = "", cp0: str = ""):
     from mordu.alpha_r_cubic import AlphaRCubic
@@ -73,8 +78,8 @@ def create_cubic(kind : str = "", fluid : str = "", cp0: str = ""):
 def create_Helmholtz(kind: str = "", fluid: str="", cp0:str =""):
     from mordu.alpha_r_helmholtz import AlphaRHelmholtz
 
-    alpha_r_expr = importlib.import_module(".alpha_r_func", "mordu.storeroom").eval(f"alpha_r_{kind}")
-    return EOS(kind, get_fluid(fluid), get_cp0(cp0), AlphaRHelmholtz, alpha_r_expr)
+    alpha_r_expr = get_alpha_r_func(kind)()
+    return EOS(kind, get_fluid(fluid), get_cp0(cp0), AlphaRHelmholtz, alpha_r_expr = alpha_r_expr)
 
 def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
     from mordu.alpha_r_saft import AlphaRSAFT
