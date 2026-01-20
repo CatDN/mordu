@@ -258,12 +258,12 @@ _lazy_objects = {
     "H2_SRK": lambda: create_cubic("SRK", "H2", "H2_cp0_NIST"),
     "H2_MSRK": lambda: create_cubic("MSRK", "H2", "H2_cp0_NIST"),
 
-    # Halmholtz EOS
+    # Helmholtz EOS
     "NH3_0290": lambda: create_Helmholtz("0290", "NH3", "NH3_cp0_NIST"),
     "NH3_0298": lambda: create_Helmholtz("0298", "NH3", "NH3_cp0_NIST"),
     "NH3_0300": lambda: create_Helmholtz("0300", "NH3", "NH3_cp0_NIST"),
 
-    "NH3_0313": lambda: create_Helmholtz("0313", "H2", "H2_cp0_NIST"),
+    "H2_0313": lambda: create_Helmholtz("0313", "H2", "H2_cp0_NIST"),
 
     # SAFT EOS
     "NH3_0323": lambda: create_SAFT("0323", "NH3", "NH3_cp0_NIST"),
