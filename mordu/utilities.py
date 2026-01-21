@@ -84,6 +84,86 @@ def multi_root(f: callable = None, bracket: list = [], args: tuple = (), n: int 
 
     return roots
 
+#
+def cubic_root_density(eos: EOS, pressure: float, temperature: float) -> np.ndarray:
+    if eos.name not in ["vdW", "PR", "RK", "MSRK"]:
+        raise AttributeError(f"{eos.name} is not one of the cubic EOS available.")
+    
+    def vdW_coefficients(a_function, b_function, pressure, temperature):
+        #see log page 192
+        a = a_function(temperature)
+        b = b_function()
+
+        coeff_0 = pressure
+        coeff_1 = -pressure * b - R * temperature
+        coeff_2 = a
+        coeff_3 = - a * b
+
+        return np.array([coeff_3, coeff_2, coeff_1, coeff_0])
+    
+    def PR_coefficients(a_function, b_function, pressure, temperature):
+        #see log page 192
+        a = a_function(temperature)
+        b = b_function()
+
+        coeff_0 = pressure
+        coeff_1 = pressure * b - R * temperature
+        coeff_2 = -3*pressure*b**2 - 2*R*temperature*b + a
+        coeff_3 = b**3*pressure + R*temperature*b**2 - a * b
+
+        return np.array([coeff_3, coeff_2, coeff_1, coeff_0])
+
+    def RK_coefficients(a_function, b_function, pressure, temperature):
+        #see log page 192
+        a = a_function(temperature)
+        b = b_function()
+
+        coeff_0 = pressure
+        coeff_1 = - R * temperature
+        coeff_2 = -pressure*b**2 - R*temperature*b + a
+        coeff_3 = - a * b
+
+        return np.array([coeff_3, coeff_2, coeff_1, coeff_0])
+
+    def SRK_coefficients(a_function, b_function, pressure, temperature):
+        #see log page 192
+        a = a_function(temperature)
+        b = b_function()
+
+        coeff_0 = pressure
+        coeff_1 = -R * temperature
+        coeff_2 = -pressure*b**2 - b*R*temperature + a
+        coeff_3 = - a * b
+
+        return np.array([coeff_3, coeff_2, coeff_1, coeff_0])
+
+    def MSRK_coefficients(a_function, b_function, pressure, temperature):
+        #see log page 192
+        a = a_function(temperature)
+        b = b_function()
+
+        coeff_0 = pressure
+        coeff_1 = -R * temperature
+        coeff_2 = -pressure*b**2 - b*R*temperature + a
+        coeff_3 = - a * b
+
+        return np.array([coeff_3, coeff_2, coeff_1, coeff_0])
+
+    coefficient_function = eval(f"{eos.name}_coefficients")
+
+    a_function = eos.alpha_r.a_function
+    b_function = eos.alpha_r.b_function
+    
+    coeffs = coefficient_function(a_function, b_function, pressure, temperature)
+    roots = np.roots(coeffs)
+    # print(roots)
+
+    roots = np.sort(roots[~np.iscomplex(roots)].astype(float))  # Remove complex roots
+    roots = roots[roots > 0]  # Keep only positive roots
+    if len(roots) == 0:
+        raise ValueError("No positive real roots found.")
+    return roots
+
 #choose the best root from a list by knowing the experimental value
 def choose_root(roots: list, experimental_value=0):
     roots = np.array(roots)
@@ -167,7 +247,7 @@ def calc_rho_inverse_distance(df_missing_rho, df_experimental, pascals=1e4, neig
 
     return df[["Paper", "P", "T", "rho"]]   #return the  dataframe but only Paper, P, T, rho
 
-def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list, debug: bool = False):
+def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list, bracket:tuple =(), n: int = int(1e3), debug: bool = False):
     """Calculate the saturation pressure of a fluid at given temperatures.
 
     Parameters
@@ -187,7 +267,7 @@ def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list, debug: bool = 
     
     pressure_equation = sp.utilities.lambdify((rho, T, P), P - eos.pressure)
     fugacity_coefficient_function = sp.utilities.lambdify((rho, T), eos.fugacity_coefficient)
-    densities = np.logspace(-1,5, int(1e3))
+    densities = np.logspace(*bracket, n)
 
     def get_pressure_guess(temperature: float) -> float:
         """Get an initial pressure guess for a specified temperature.
@@ -243,8 +323,9 @@ def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list, debug: bool = 
             solution = sol.x
             pressure_guess = sol.x[0]
         except IndexError:
-            print("IndexError: no solution has been found due to the root finding method reaching a point with less than two density roots")
-            print("Assigning 0 to return value")
+            if debug:
+                print("IndexError: no solution has been found due to the root finding method reaching a point with less than two density roots")
+                print("Assigning 0 to return value")
             solution = [0]
         P_sat += list(solution)
 

@@ -2,11 +2,16 @@
 
 from .alpha_0 import Alpha0
 from .symbols import *
+from .purefluid import PureFluid
+from .cp0 import Cp0
 
 #EOS parent class
 class EOS:
+    """Class for the creation of all pure fluid EOS.
 
-    def __init__(self, name:str, fluid, cp0_object, AlphaRClass, **kwargs):
+    """
+
+    def __init__(self, name:str, fluid: PureFluid, cp0_object: Cp0, AlphaRClass, ref:str = "", **kwargs):
         self.fluid = fluid
         
         self.alpha_0 = Alpha0(self.fluid, cp0_object)
@@ -17,6 +22,8 @@ class EOS:
         self.name = name
 
         self.pressure_equation = sp.lambdify((rho, P, T), P- self.pressure)
+
+        self.ref = ref
 
     @property
     def pressure(self):

@@ -16,7 +16,7 @@ class AlphaRCubic():
     This definition **does not** include an option for volume translation.
     """
 
-    def __init__(self, alpha_r_expr: sp.Expr, a_value: float,  b_value: float):
+    def __init__(self, alpha_r_expr: sp.Expr, a_value: float,  b_value: float, a_function:callable, b_function:callable):
         """Create the non-dimensional Helmholtz energy for a cubic equation of state
 
         Parameters
@@ -37,8 +37,8 @@ class AlphaRCubic():
         self.a = a_value
         self.b = b_value
 
-        self.a_function = sp.lambdify((T, z1, z2), self.a)
-        self.b_function = sp.lambdify((z1, z2), self.b)
+        self.a_function = a_function
+        self.b_function = b_function
 
         self.alpha_r = self.expression.subs([(a, self.a), (b, self.b)])
 
@@ -78,7 +78,10 @@ class AlphaRCubic():
 
         b_value = b_expr.subs([(T_c, fluid.T_c), (P_c, fluid.P_c)])
 
-        return cls(alpha_r_expr, a_value, b_value)
+        a_function = sp.lambdify((T), a_value)
+        b_function = sp.lambdify((), b_value)
+
+        return cls(alpha_r_expr, a_value, b_value, a_function, b_function)
 
 
 

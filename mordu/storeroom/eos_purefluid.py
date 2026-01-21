@@ -25,67 +25,73 @@ def get_alpha_r_func(name:str):
 def create_ideal(fluid:str, cp0:str):
     from mordu.alpha_r_helmholtz import AlphaRHelmholtz
 
-    return EOS("ideal", get_fluid(fluid) ,get_cp0(cp0), AlphaRHelmholtz, alpha_r_expr=sp.sympify(0))
+    return EOS("ideal", get_fluid(fluid) ,get_cp0(cp0), AlphaRHelmholtz, alpha_r_expr=sp.sympify(0), ref="Ideal gas law")
 
 def create_cubic(kind : str = "", fluid : str = "", cp0: str = ""):
     from mordu.alpha_r_cubic import AlphaRCubic
 
     if kind=="vdW":
         cubic_params = {
+            "ref": "van der Waals",
             "alpha_r_expr":  sp.log((1/rho/(1/rho-b)))-a/(R*T*1/rho),
             "a_c_expr": 27/64*R**2*T_c**2/P_c,
             "alpha_T_expr": sp.sympify(1),
             "b_expr": 1/8*R*T_c/P_c
         }
 
-    if kind == "PR":
+    elif kind == "PR":
         cubic_params = {
+            "ref": "Peng-Robinson",
             "alpha_r_expr": sp.log((1/rho/(1/rho-b))) + 1/(R*T)*a/(4*b)*2**0.5*sp.log(((1/rho-b*(2**0.5-1))/(1/rho+b*(2**0.5+1)))),
             "a_c_expr": 0.4572*R**2*T_c**2/P_c,
             "alpha_T_expr": (1+(0.37464+1.54226*omega - 0.2699*omega**2)*(1-(T/T_c)**0.5))**2,
             "b_expr": 0.0778*R*T_c/P_c
         }
 
-    if kind == "RK":
+    elif kind == "RK":
         cubic_params = {
+            "ref": "Redlich-Kwong",
             "alpha_r_expr": sp.log((1/rho/(1/rho-b))) + 1/(R*T)*a/b*sp.log((1/rho/(1/rho+b))),
             "a_c_expr": 0.4275*R**2*T_c**2/P_c,
             "alpha_T_expr": 1/T**0.5,
             "b_expr":  0.0867*R*T_c/P_c
         }
 
-    if kind == "SRK":
+    elif kind == "SRK":
         cubic_params ={
+            "ref": "Soave-Redlich-Kwong",
             "alpha_r_expr": sp.log(((1/rho/(1/rho-b)))) + 1/(R*T)*a/b*sp.log((1/rho/(1/rho+b))),
             "a_c_expr": 0.42748*R**2*T_c**2/P_c,
             "alpha_T_expr": (1+ (0.48 + 1.574*omega - 0.176*omega**2)*(1-(T/T_c)**0.5))**2,
             "b_expr": 0.08664*R*T_c/P_c
         }
 
-    if kind == "MSRK":
+    elif kind == "MSRK":
         cubic_params ={
+            "ref": "Modified Soave-Redlich-Kwong",
             "alpha_r_expr": sp.log(((1/rho/(1/rho-b)))) + 1/(R*T)*a/b*sp.log((1/rho/(1/rho+b))),
             "a_c_expr": 0.42748*R**2*T_c**2/P_c,
             "alpha_T_expr": (1+ (0.48503 + 1.5571*omega - 0.15613*omega**2)*(1-(T/T_c)**0.5))**2,
             "b_expr": 0.08664*R*T_c/P_c
         }
     
-    elif kind not in ["vdW", "PR", "RK", "SRK", "MSRK"]:
+    else:
         raise ValueError(f"{kind} cubic equation of state has not been predefined, please create EOS from scratch")
     
     return EOS(kind, get_fluid(fluid), get_cp0(cp0), AlphaRCubic, **cubic_params)
 
-def create_Helmholtz(kind: str = "", fluid: str="", cp0:str =""):
+def create_Helmholtz(kind: str = "", fluid: str="", cp0:str ="", ref: str = ""):
     from mordu.alpha_r_helmholtz import AlphaRHelmholtz
 
     alpha_r_expr = get_alpha_r_func(kind)()
-    return EOS(kind, get_fluid(fluid), get_cp0(cp0), AlphaRHelmholtz, alpha_r_expr = alpha_r_expr)
+    return EOS(kind, get_fluid(fluid), get_cp0(cp0), AlphaRHelmholtz, alpha_r_expr = alpha_r_expr, ref=ref)
 
 def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
     from mordu.alpha_r_saft import AlphaRSAFT
 
     if kind == "0323":
         SAFT_params ={
+            "ref": "NguyenHuynh et al. (2020)",
             "epsilon": 124.3255,      #epsilon/k, in (K)
             "sigma": 2.2334,          #sigma, in (A) angstrom
             "m": 2.7078,              #segment length for ammonia, dimensionless
@@ -115,6 +121,7 @@ def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
 
     elif kind == "0324":
         SAFT_params = {
+            "ref": "Grandjean et al. (2014)",
             "epsilon": 204.63,      #epsilon/k, in (K)
             "sigma": 3.2386,          #sigma, in (A) angstrom
             "m": 1.1157,              #segment length for ammonia, dimensionless
@@ -171,6 +178,7 @@ def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
         alpha_disp = alpha_disp.subs([(rho, rho*N_av*1e-30)])
 
         SAFT_params = {
+            "ref": "Huang and Radosz (1990)",
             "epsilon": epsilon,      #epsilon/k, in (K)
             "sigma": sigma,          #sigma, in (A) angstrom
             "m": m,              #segment length for ammonia, dimensionless
@@ -183,6 +191,7 @@ def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
 
     elif kind == "0330":
         SAFT_params = {
+            "ref": "Mejbri and Bellagi (2006)",
             "epsilon": 75.092,      #epsilon/k, in (K)
             "sigma": 2.2677,          #sigma, in (A) angstrom
             "m": 2.5485,              #segment length for ammonia, dimensionless
@@ -212,6 +221,7 @@ def create_SAFT(kind:str="", fluid:str="", cp0:str =""):
     
     elif kind == "0552":
         SAFT_params ={
+            "ref": "Tran et al. (2009)",
             "epsilon": 30.32,
             "sigma":2.86,
             "m": 1.25,
@@ -259,11 +269,11 @@ _lazy_objects = {
     "H2_MSRK": lambda: create_cubic("MSRK", "H2", "H2_cp0_NIST"),
 
     # Helmholtz EOS
-    "NH3_0290": lambda: create_Helmholtz("0290", "NH3", "NH3_cp0_NIST"),
-    "NH3_0298": lambda: create_Helmholtz("0298", "NH3", "NH3_cp0_NIST"),
-    "NH3_0300": lambda: create_Helmholtz("0300", "NH3", "NH3_cp0_NIST"),
+    "NH3_0290": lambda: create_Helmholtz("0290", "NH3", "NH3_cp0_NIST", ref="Haar and Gallagher (1978)"),
+    "NH3_0298": lambda: create_Helmholtz("0298", "NH3", "NH3_cp0_NIST", ref= "Haar and Gallagher (1975)"),
+    "NH3_0300": lambda: create_Helmholtz("0300", "NH3", "NH3_cp0_NIST", ref= "Gao et al. (2023)"),
 
-    "H2_0313": lambda: create_Helmholtz("0313", "H2", "H2_cp0_NIST"),
+    "H2_0313": lambda: create_Helmholtz("0313", "H2", "H2_cp0_NIST", ref = "Leachman et al. (2009)"),
 
     # SAFT EOS
     "NH3_0323": lambda: create_SAFT("0323", "NH3", "NH3_cp0_NIST"),
