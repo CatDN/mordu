@@ -167,7 +167,7 @@ def calc_rho_inverse_distance(df_missing_rho, df_experimental, pascals=1e4, neig
 
     return df[["Paper", "P", "T", "rho"]]   #return the  dataframe but only Paper, P, T, rho
 
-def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list):
+def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list, debug: bool = False):
     """Calculate the saturation pressure of a fluid at given temperatures.
 
     Parameters
@@ -247,6 +247,9 @@ def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list):
             print("Assigning 0 to return value")
             solution = [0]
         P_sat += list(solution)
+
+        if debug:
+            print(f"P_sat({temperature} K) = {solution} Pa")
 
     return P_sat
 
