@@ -42,7 +42,7 @@ def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol
     sign_changes = np.where(sign[:-1] != sign[1:])[0]
 
     # find roots around sign changes usign the brentq method
-    roots = [optimize.brenth(f=f,args = args, a=x[s], b= x[s+1], xtol=1e-12, rtol=1e-12) for s in sign_changes]
+    roots = [optimize.root_scalar(f=f,method ="brentq", args = args, bracket=(x[s], x[s+1]), xtol=1e-12, rtol=1e-12).root for s in sign_changes]
     roots = np.array(roots)     # array conversion needed for discontinuity check
 
     # check for discontinuities and erase if present
