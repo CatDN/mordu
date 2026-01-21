@@ -42,7 +42,7 @@ def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol
     sign_changes = np.where(sign[:-1] != sign[1:])[0]
 
     # find roots around sign changes usign the brentq method
-    roots = [optimize.brentq(f=f,a=x[s], b= x[s+1], xtol=1e-8) for s in sign_changes]
+    roots = [optimize.brenth(f=f,args = args, a=x[s], b= x[s+1], xtol=1e-12, rtol=1e-12) for s in sign_changes]
     roots = np.array(roots)     # array conversion needed for discontinuity check
 
     # check for discontinuities and erase if present
@@ -55,6 +55,29 @@ def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol
 
 # find multiple roots of a function between a given bracket (univariate functions only)
 def multi_root(f: callable = None, bracket: list = [], args: tuple = (), n: int = 0) -> np.ndarray:
+    """Find all roots within a given bracket
+
+    Uses logarithmic spacing to create an x array where f is evaluated
+    The roots are then found between all the points at which f changes sign
+    using the brentq method.
+
+    Parameters
+    ----------
+    f: callable
+        The function for which root finding is necessary
+    bracket: list
+        A list of two elements which specifies the x limits of the root finding
+    args: tuple
+        Any additional arguments the callable f requires
+    n: int
+        Amount of x points to create for root finding, the more x points the more
+        it is assured all roots will be found, but the less efficient the code is
+
+    Returns
+    -------
+    roots: np.ndarray
+        All the roots found in the specified bracket
+    """
     x = np.logspace(*bracket, n)
 
     roots = multi_root_x(f, x, args)
@@ -164,7 +187,7 @@ def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list):
     
     pressure_equation = sp.utilities.lambdify((rho, T, P), P - eos.pressure)
     fugacity_coefficient_function = sp.utilities.lambdify((rho, T), eos.fugacity_coefficient)
-    densities = np.logspace(-4,4, int(1e3))
+    densities = np.logspace(-1,5, int(1e3))
 
     def get_pressure_guess(temperature: float) -> float:
         """Get an initial pressure guess for a specified temperature.
@@ -181,8 +204,8 @@ def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list):
         """
         pressure_guess = fluid.P_t# + (fluid.P_c - fluid.P_t) * (temperature - fluid.T_t) / (fluid.T_c - fluid.T_t)
         n_roots = 0
-        while n_roots < 3:
-            pressure_guess += 1e2
+        while n_roots < 2:
+            pressure_guess += 1e4
             density_roots = multi_root_x(pressure_equation, densities, args=(temperature, pressure_guess))
             n_roots = len(density_roots)
         return pressure_guess
