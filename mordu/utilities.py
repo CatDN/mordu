@@ -55,28 +55,28 @@ def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol
 
 # find multiple roots of a function between a given bracket (univariate functions only)
 def multi_root(f: callable = None, bracket: list = [], args: tuple = (), n: int = 0) -> np.ndarray:
-    """Find all roots within a given bracket
+    """Find all roots within a given bracket.
 
-    Uses logarithmic spacing to create an x array where f is evaluated
-    The roots are then found between all the points at which f changes sign
-    using the brentq method.
+    Uses logarithmic spacing to create an `x` array where `f` is evaluated
+    The roots are then found between all the points at which `f` changes sign
+    using the `brentq` method.
 
     Parameters
     ----------
     f: callable
         The function for which root finding is necessary
     bracket: list
-        A list of two elements which specifies the x limits of the root finding
+        A list of two elements which specifies the `x` limits of the root finding
     args: tuple
         Any additional arguments the callable f requires
     n: int
-        Amount of x points to create for root finding, the more x points the more
-        it is assured all roots will be found, but the less efficient the code is
+        Amount of `x` points to create for root finding, the more `x` points the more
+        it is assured all roots will be found, but the less efficient the algorithm is.
 
     Returns
     -------
     roots: np.ndarray
-        All the roots found in the specified bracket
+        All the roots found in the specified bracket.
     """
     x = np.logspace(*bracket, n)
 
