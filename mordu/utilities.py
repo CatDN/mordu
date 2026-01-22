@@ -15,8 +15,8 @@ from .eos import EOS
 def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol: float = 1) -> np.ndarray:
     """ Find all roots of f in given an x array.
 
-    Fine-grained root finding is performed with `scipy.optimize.root_scalar`.
-
+    Fine-grained root finding is performed with `scipy.optimize.root_scalar` using the `brentq` method.
+    
     Parameters
     ----------
     f: Callable
@@ -31,7 +31,7 @@ def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol
     Returns
     -------
     roots: np.ndarray
-        Array containing all unique roots that were found in `bracket`.
+        Array containing all roots that were found based on the given `x`.
     """
     
     # Evaluate function in given x
@@ -85,7 +85,27 @@ def multi_root(f: callable = None, bracket: list = [], args: tuple = (), n: int 
     return roots
 
 #
-def cubic_root_density(eos: EOS, pressure: float, temperature: float) -> np.ndarray:
+def cubic_root_density(eos: EOS, args:tuple = ()) -> np.ndarray:
+    """Function for finding density roots of cubic EOS given the pressure and temperature.
+
+    This function uses the cubic behaviour of each cubic EOS to more efficiently calculate
+    density through root finding by using  the `np.roots` function from `numpy`. Only works
+    for pre-considered cubic equations of state, which currently consist of: vdW, PR, RK, MSRK.
+
+    Parameters
+    ----------
+    eos: EOS
+        The specific cubic EOS for finding density at specific pressure and temperature.
+    args: tuple -> pressure, temperature
+        The pressure in [Pa] and temperature in [K] for which the densities will be calculated
+        as a tuple.
+    
+    Returns
+    -------
+    roots: np.ndarray
+        The density roots in [mol/m3] for the pressure and temperature given    
+    
+    """
     if eos.name not in ["vdW", "PR", "RK", "MSRK"]:
         raise AttributeError(f"{eos.name} is not one of the cubic EOS available.")
     
@@ -154,6 +174,8 @@ def cubic_root_density(eos: EOS, pressure: float, temperature: float) -> np.ndar
     a_function = eos.alpha_r.a_function
     b_function = eos.alpha_r.b_function
     
+    pressure, temperature = args[0], args[1]
+
     coeffs = coefficient_function(a_function, b_function, pressure, temperature)
     roots = np.roots(coeffs)
     # print(roots)
@@ -162,10 +184,26 @@ def cubic_root_density(eos: EOS, pressure: float, temperature: float) -> np.ndar
     roots = roots[roots > 0]  # Keep only positive roots
     if len(roots) == 0:
         raise ValueError("No positive real roots found.")
+    
     return roots
 
 #choose the best root from a list by knowing the experimental value
-def choose_root(roots: list, experimental_value=0):
+def choose_root(roots: list, experimental_value: float =0) -> float:
+    """Chooses the best root based on a given experimental value
+    
+    Parameters
+    ----------
+    roots : list
+        List of roots. This can for example be obtained from the `multi_root` function.
+    experimental_value: float
+        Experimental value to compare the roots to.
+
+    Returns
+    -------
+    best_root : float
+        The root from the `roots` list closest to the `experimental_value` given.
+    """
+
     roots = np.array(roots)
 
     difference = np.abs(experimental_value-roots)
@@ -246,92 +284,3 @@ def calc_rho_inverse_distance(df_missing_rho, df_experimental, pascals=1e4, neig
     df = df.set_index("index_y").sort_index().reset_index(drop=True)
 
     return df[["Paper", "P", "T", "rho"]]   #return the  dataframe but only Paper, P, T, rho
-
-def calc_Psat(fluid: PureFluid, eos: EOS, temperature_list: list, bracket:tuple =(), n: int = int(1e3), debug: bool = False):
-    """Calculate the saturation pressure of a fluid at given temperatures.
-
-    Parameters
-    ----------
-    fluid: PureFluid
-        The fluid object containing properties like critical and triple point temperatures.
-    eos: EOS
-        The equation of state object used for pressure and fugacity calculations.
-    temperature_list: list
-        A list of temperatures at which to calculate saturation pressures.
-
-    Returns
-    -------
-    P_sat: list
-        A list of calculated saturation pressures corresponding to the input temperatures.
-    """
-    
-    pressure_equation = sp.utilities.lambdify((rho, T, P), P - eos.pressure)
-    fugacity_coefficient_function = sp.utilities.lambdify((rho, T), eos.fugacity_coefficient)
-    densities = np.logspace(*bracket, n)
-
-    def get_pressure_guess(temperature: float) -> float:
-        """Get an initial pressure guess for a specified temperature.
-
-        Parameters
-        ----------
-        temperature: float
-            The temperature for which to estimate the pressure.
-
-        Returns
-        -------
-        pressure_guess: float
-            An initial pressure guess.
-        """
-        pressure_guess = fluid.P_t# + (fluid.P_c - fluid.P_t) * (temperature - fluid.T_t) / (fluid.T_c - fluid.T_t)
-        n_roots = 0
-        while n_roots < 2:
-            pressure_guess += 1e4
-            density_roots = multi_root_x(pressure_equation, densities, args=(temperature, pressure_guess))
-            n_roots = len(density_roots)
-        return pressure_guess
-
-    def calc_saturation_pressure(pressure: float, temperature: float) -> float:
-        """ This is the function for which finding the root yields the saturation pressure
-
-        Parameters
-        ----------
-        pressure: float
-            The initial pressure guess.
-        temperature:  float
-            The temperature for which to calculate saturation pressure.
-
-        Returns
-        -------
-        eq: float
-            The result of the fugacity ratio equation.
-        """
-        density_roots = multi_root_x(pressure_equation, densities, args=(temperature, pressure))
-        fugacities = fugacity_coefficient_function(density_roots, temperature)
-        fugacities = fugacities[fugacities != max(fugacities)]
-        eq = fugacities[0] / fugacities[1] - 1
-        return eq
-
-    P_sat = []
-    pressure_guess = get_pressure_guess(temperature_list[0])
-
-    for temperature in temperature_list:
-        if temperature > fluid.T_c or temperature < fluid.T_t:
-            print("Temperature is outside the critical and triple point bounds")
-            break
-        try:
-            sol = optimize.root(calc_saturation_pressure, x0=[pressure_guess], args=(temperature,), method='broyden1', options={"xtol": 1e2})
-            solution = sol.x
-            pressure_guess = sol.x[0]
-        except IndexError:
-            if debug:
-                print("IndexError: no solution has been found due to the root finding method reaching a point with less than two density roots")
-                print("Assigning 0 to return value")
-            solution = [0]
-        P_sat += list(solution)
-
-        if debug:
-            print(f"P_sat({temperature} K) = {solution} Pa")
-
-    return P_sat
-
-
