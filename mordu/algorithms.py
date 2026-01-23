@@ -53,15 +53,23 @@ def calc_saturation_pressure(eos: EOS, temperatures:list, tol: float = 1e-6, deb
         densities = np.logspace(-1, 5, int(1e4))
         args = [P_equation, densities]
 
+    density_roots = root_finding(*args, args=(pressure_guess, temperatures[0]))
+
     for temperature in temperatures:
-        density_roots = []
-        while len(density_roots)<3 and pressure_guess < 5e7:
-            # calculate the density roots from pressure and temperature
-            density_roots = root_finding(*args, args=(pressure_guess, temperature))
-            pressure_guess = pressure_guess*1.0005
+
+        # multiplication factor is inversely proportional to distance to critical temperature
+        factor = 1 + 1e-4 + max(0, (1 - (temperature-eos.fluid.T_t)/(eos.fluid.T_c - eos.fluid.T_t)))
 
         if debug:
-            print(f"guess = {pressure_guess}")
+            print(f"factor = {factor}")
+
+        while len(density_roots)<3 and pressure_guess < 5e7:
+            # calculate the density roots from pressure and temperature
+            pressure_guess = pressure_guess*factor
+            density_roots = root_finding(*args, args=(pressure_guess, temperature))
+
+        # if debug:
+            # print(f"guess = {pressure_guess}")
 
         # calculate the fugacity coefficients
         phi_v = fugacity_coefficient(density_roots[0], temperature)
@@ -70,9 +78,9 @@ def calc_saturation_pressure(eos: EOS, temperatures:list, tol: float = 1e-6, deb
         # check their ratio
         while abs(phi_v/phi_l - 1) > tol and pressure_guess < 5e7:
             if phi_v > phi_l:   # the vapour wants to escape, so decrease pressure
-                pressure_guess = pressure_guess - pressure_guess*min(0.8, abs(phi_v/phi_l-1)) # min(1e2, pressure_guess*0.01)
+                pressure_guess = pressure_guess - pressure_guess*min(0.5, abs(phi_v/phi_l-1)**(1)) # min(1e2, pressure_guess*0.01)
             if phi_l > phi_v:   # the liquid want to escape so increase the pressure
-                pressure_guess = pressure_guess + pressure_guess*min(0.8, abs(phi_v/phi_l-1)) # min(1e2, pressure_guess*0.01)
+                pressure_guess = pressure_guess + pressure_guess*min(0.5, abs(phi_v/phi_l-1)**(1)) # min(1e2, pressure_guess*0.01)
 
             # recalculate density roots
             density_roots = root_finding(*args, args=(pressure_guess, temperature))
@@ -86,7 +94,7 @@ def calc_saturation_pressure(eos: EOS, temperatures:list, tol: float = 1e-6, deb
                 print(f"roots = {density_roots}, pressure = {pressure_guess}, phi_v/phi_l = {phi_v/phi_l}")
 
         if pressure_guess>5e7:
-            print("Pressure point couldn't be found")
+            print(f"Pressure point couldn't be found, temperature = {temperature} K")
             saturation_pressure += [0]
             pressure_guess = max(max(saturation_pressure), eos.fluid.P_t)
             continue
