@@ -90,6 +90,8 @@ def calc_saturation_pressure(eos: EOS, temperatures:list, max_iter: int = 100, t
             # recalculate density roots
             density_roots = root_finding(*args, args=(pressure_guess, temperature))
 
+            # make the factor dependent on the error metric
+            factor = 1 + abs(phi_v/phi_l - 1)**1.5  # power of 1.5 slows down the factor the smaller the error metric
             # recheck for number of roots
             while len(density_roots)<3 and pressure_guess < 5e7:
                 # calculate the density roots from pressure and temperature
