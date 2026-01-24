@@ -12,7 +12,7 @@ from .eos import EOS
 
 # find multiple roots of a function given logarithmically spaced x values (univariate function only)
 # recommended over multi_root if used multiple times with the same x
-def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol: float = 1) -> np.ndarray:
+def multi_root_x(f: callable = None, x: np.ndarray = None, args: tuple = (), tol: float = 1e-6) -> np.ndarray:
     """ Find all roots of f in given an x array.
 
     Fine-grained root finding is performed with `scipy.optimize.root_scalar` using the `brentq` method.

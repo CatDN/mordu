@@ -30,7 +30,17 @@ class AlphaRCubic():
             This value can be a dependent of the symbol T (temperature in [K])
         b_value: float
             Value of the b parameter for the specific fluid for the specific EOS
-            This value is almost always a float
+            This value is almost always a float.
+        a_function: callable
+            Coefficient `a` as a function of temperature `T`. This is used to calculated the
+            cubic coefficients necessary for the cubic root solving within utilities.
+        b_function: callable
+            Coefficient `b` as a function. For a pure fluid `b` is constant, for a mixture `b`
+            is a function of composition
+
+        Attributes
+        ----------
+        
         """
         self.expression = alpha_r_expr
 
