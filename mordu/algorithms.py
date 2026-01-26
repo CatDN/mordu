@@ -25,11 +25,11 @@ def calc_saturation_pressure(eos: EOS, temperatures:list, max_iter: int = 100, t
     temperatures: list
         List of temperatures in [K] at which to calculate saturation pressure.
         Values between the triple and critical points only.
-    max_iter: int
+    max_iter: int, default = 100
         Maximum number of iterations for the iterative algorithm.
-    tol: float = 1e-6
+    tol: float, default = 1e-6
         Tolerance for iterative method
-    debug: bool = False
+    debug: bool, default = False
         Debug flag. If 'True' then useful debugging print statements will appear.
 
     Returns
@@ -73,6 +73,12 @@ def calc_saturation_pressure(eos: EOS, temperatures:list, max_iter: int = 100, t
             pressure_guess = pressure_guess*factor
             density_roots = root_finding(*args, args=(pressure_guess, temperature))
 
+        if pressure_guess>5e7 or counter>= max_iter:
+            print(f"Pressure point couldn't be found, temperature = {temperature} K")
+            saturation_pressure += [0]
+            pressure_guess = max(max(saturation_pressure), eos.fluid.P_t)
+            continue
+
         if debug:
             print(f"guess = {pressure_guess}")
 
@@ -91,12 +97,15 @@ def calc_saturation_pressure(eos: EOS, temperatures:list, max_iter: int = 100, t
             density_roots = root_finding(*args, args=(pressure_guess, temperature))
 
             # make the factor dependent on the error metric
-            factor = 1+ min(0.1, abs(phi_v/phi_l - 1)**1.5)  # power > 1 slows down the factor the smaller the error metric
+            factor = 1+ min(0.1, abs(phi_v/phi_l - 1)**1.2)  # power > 1 slows down the factor the smaller the error metric
             # recheck for number of roots
             while len(density_roots)<3 and pressure_guess < 5e7:
                 # calculate the density roots from pressure and temperature
                 pressure_guess = pressure_guess*factor
                 density_roots = root_finding(*args, args=(pressure_guess, temperature))
+
+            if pressure_guess>=5e7:
+                break
 
             # calculate the fugacity coefficients
             phi_v = fugacity_coefficient(density_roots[0],temperature)

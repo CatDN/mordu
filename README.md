@@ -18,7 +18,10 @@
 =====================================================================================
 ```
 
+
 # mordu
+
+`pip install mordu`
 
 Modelling Of Real-fluids Defined by Users
 
