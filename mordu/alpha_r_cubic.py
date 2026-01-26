@@ -14,6 +14,28 @@ class AlphaRCubic():
     Each equation of state uses a different definition for the residual Helmholtz energy.
     This definition works for cubic equations of state only.
     This definition **does not** include an option for volume translation.
+
+    Attributes
+    ----------
+    expression: sp.Expr
+        Sympy expression for the non-dimensional Helmholtz energy as a function 
+        of the symbols T (temperature in [K]), rho (density in [mol/m3]),
+        a (a parameter in []), b (b parameter in [])
+    a_value: sp.Expr
+        Sympy expression of the a parameter for the specific fluid for the specific EOS
+        This value can be a dependent of the symbol T (temperature in [K])
+    b_value: float
+        Value of the b parameter for the specific fluid for the specific EOS
+        This value is almost always a float.
+    a_function: callable
+        Coefficient `a` as a function of temperature `T`. This is used to calculated the
+        cubic coefficients necessary for the cubic root solving within utilities.
+    b_function: callable
+        Coefficient `b` as a function. For a pure fluid `b` is constant, for a mixture `b`
+        is a function of composition
+    alpha_r: sp.Expr
+        Sympy expression for the non-dimensional Helmholtz energy as a function of only
+        temperature in [K], `T`, and density in [mol/m3], `rho`.
     """
 
     def __init__(self, alpha_r_expr: sp.Expr, a_value: float,  b_value: float, a_function:callable, b_function:callable):
@@ -37,10 +59,7 @@ class AlphaRCubic():
         b_function: callable
             Coefficient `b` as a function. For a pure fluid `b` is constant, for a mixture `b`
             is a function of composition
-
-        Attributes
-        ----------
-        
+       
         """
         self.expression = alpha_r_expr
 
