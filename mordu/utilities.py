@@ -1,4 +1,15 @@
 #13/01/2025
+"""Useful extra functions for the calculation of certain parameters:
+
+- finding multiple roots within a given bracket for a specific function
+
+- finding multiple roots given x for a specific function
+
+- finding density from pressure and temperature for cubic EOS through efficient root-finding
+and by taking advantage of the cubic nature of the equations
+
+- choosing a root from a list based on a given experimental value
+"""
 
 #other useful functions to use with the EOS and EOS data
 import numpy as np

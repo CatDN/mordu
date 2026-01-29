@@ -1,12 +1,15 @@
 # 30/09/2025
 
 from .symbols import *
+from .purefluid import PureFluid
 
 # non dimensional Helmholtz energy for SAFT EOS
 class AlphaRSAFT():
+    """
+    """
     
     def __init__(self, epsilon:float, sigma:float, m:float, epsilon_AB:float, k_AB:float, M:int, x_p:float, assocation_scheme:str,
-                 alpha_hs, alpha_chain, alpha_disp, alpha_assoc, alpha_multipolar):
+                 alpha_hs: sp.Expr, alpha_chain: sp.Expr, alpha_disp: sp.Expr, alpha_assoc: sp.Expr, alpha_multipolar: sp.Expr):
 
         self.epsilon = epsilon
 
@@ -36,13 +39,13 @@ class AlphaRSAFT():
 
     # for a pure fluid (fluid is just a placeholder argument)
     @classmethod
-    def for_purefluid(cls, fluid, 
+    def for_purefluid(cls, fluid: PureFluid, 
                       epsilon:float = 0, sigma:float = 0, m:float = 0, 
                       epsilon_AB:float = 0, k_AB:float = 0, M:int = 0, 
                       x_p:float = 0, 
                       a:list=[], b:list=[], 
                       association_scheme:str = "", 
-                      alpha_hs = None, alpha_chain=None, alpha_disp = None, alpha_assoc=None, alpha_multipolar=None,
+                      alpha_hs: sp.Expr = None, alpha_chain: sp.Expr = None, alpha_disp: sp.Expr = None, alpha_assoc: sp.Expr = None, alpha_multipolar: sp.Expr = None,
                       **kwargs):
         
         # values used in most terms
