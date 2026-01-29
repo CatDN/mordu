@@ -1,3 +1,6 @@
+"""Module which stores all the useful and used symbols within mordu.
+"""
+
 import sympy as sp
 
 # constants:
